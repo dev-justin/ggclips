@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply text-white;
+  @apply bg-zinc-900;
+}
+
+main {
+  @apply px-6 sm:px-8;
+  @apply py-8;
+}
+
+main a.router-link-active {
+  @apply bg-transparent;
+}
