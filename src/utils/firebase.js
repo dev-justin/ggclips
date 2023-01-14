@@ -18,7 +18,6 @@ const appCheck = initializeAppCheck(app, {
   provider: new ReCaptchaV3Provider(import.meta.env.VITE_FIREBASE_RECAPTCHA),
   isTokenAutoRefreshEnabled: true,
 });
-appCheck.activate();
 
 const auth = getAuth(app);
 const db = getFirestore(app);
