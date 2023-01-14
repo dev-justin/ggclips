@@ -16,6 +16,8 @@ import {
   getDocs,
   orderBy,
   limit,
+  updateDoc,
+  arrayUnion,
 } from "firebase/firestore/lite";
 
 // Get all docuemnt ids from the user collection
@@ -144,6 +146,14 @@ const getRecentClips = async (max) => {
   return querySnapshot;
 };
 
+// Follow another user
+const followUser = async (currentUser, followUser) => {
+  const docRef = doc(db, "usernames", currentUser);
+  await updateDoc(docRef, {
+    following: arrayUnion(followUser.toLowerCase()),
+  });
+};
+
 const errorCodes = (code) => {
   switch (code) {
     case "auth/email-already-in-use":
@@ -174,4 +184,5 @@ export {
   getClipsByUsername,
   getUserDetails,
   getRecentClips,
+  followUser,
 };

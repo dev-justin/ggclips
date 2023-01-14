@@ -8,8 +8,17 @@
   <main>
     <!-- Users Clips -->
     <Loaders v-if="loading" />
-    <div v-else>
-      <div v-if="isOwner">
+    <div v-else class="flex flex-col">
+      <div class="flex justify-end -mt-16 sm:-mt-20" v-if="!isOwner">
+        <button
+          type="button"
+          class="bg-purple-700 px-4 py-2 rounded-md font-semibold hover:bg-purple-900 transition-all duration-150 ease-out"
+          @click.prevent="follow"
+        >
+          Follow
+        </button>
+      </div>
+      <div v-else>
         <p class="text-lg text-zinc-500">
           This is how you appear to the public.
         </p>
@@ -46,6 +55,7 @@ import {
   convertDate,
   getClipsByUsername,
   getUserDetails,
+  followUser,
 } from "@/utils/firebase-helpers";
 import { useUserStore } from "@/stores/user";
 import { ref } from "vue";
@@ -78,5 +88,9 @@ const getClips = () => {
     .finally(() => {
       loading.value = false;
     });
+};
+
+const follow = () => {
+  followUser(user.username, id);
 };
 </script>

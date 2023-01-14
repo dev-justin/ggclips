@@ -11,7 +11,7 @@
         aria-hidden="true"
       />
     </div>
-    <div class="relative mx-auto max-w-7xl py-24 px-6 sm:py-32 lg:px-8">
+    <div class="relative py-12 px-6 sm:py-16 lg:px-8">
       <h1
         class="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl"
       >
