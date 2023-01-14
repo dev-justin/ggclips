@@ -18,6 +18,7 @@ import {
   limit,
   updateDoc,
   arrayUnion,
+  arrayRemove,
 } from "firebase/firestore/lite";
 
 // Get all docuemnt ids from the user collection
@@ -32,6 +33,24 @@ const getUserDetails = async (username) => {
   const docRef = doc(db, "usernames", username.toLowerCase());
   const docSnap = await getDoc(docRef);
   return { username: docSnap.id, ...docSnap.data() };
+};
+
+// Get user details from the auth'ed user and the requested user
+const getAuthAndReqUser = async (authUser, reqUser) => {
+  // Auth user
+  const authUserDoc = doc(db, "usernames", authUser.toLowerCase());
+  const authUserSnap = await getDoc(authUserDoc);
+  // Requested user
+  const reqUserDoc = doc(db, "usernames", reqUser.toLowerCase());
+  const reqUserSnap = await getDoc(reqUserDoc);
+
+  if (!reqUserSnap.exists() || !authUserSnap.exists()) {
+    throw { code: "auth/user-not-found" };
+  }
+  return {
+    authUser: { username: authUserSnap.id, ...authUserSnap.data() },
+    reqUser: { username: reqUserSnap.id, ...reqUserSnap.data() },
+  };
 };
 
 // Create a new user with email and password and save it to the database under users collection
@@ -148,9 +167,17 @@ const getRecentClips = async (max) => {
 
 // Follow another user
 const followUser = async (currentUser, followUser) => {
-  const docRef = doc(db, "usernames", currentUser);
+  const docRef = doc(db, "usernames", currentUser.toLowerCase());
   await updateDoc(docRef, {
     following: arrayUnion(followUser.toLowerCase()),
+  });
+};
+
+// Unfollow another user
+const unfollowUser = async (currentUser, unfollowUser) => {
+  const docRef = doc(db, "usernames", currentUser.toLowerCase());
+  await updateDoc(docRef, {
+    following: arrayRemove(unfollowUser.toLowerCase()),
   });
 };
 
@@ -185,4 +212,6 @@ export {
   getUserDetails,
   getRecentClips,
   followUser,
+  unfollowUser,
+  getAuthAndReqUser,
 };

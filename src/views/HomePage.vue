@@ -7,7 +7,7 @@
       <Loaders v-if="loading" />
       <div v-else>
         <p class="text-xl font-bold text-zinc-500" v-if="clips.length === 0">
-          No clips to show, upload your first clip above!
+          No clips to show, please try again later.
         </p>
         <div class="flex gap-8 flex-wrap">
           <div v-for="clip in clips" class="w-[370px]">
