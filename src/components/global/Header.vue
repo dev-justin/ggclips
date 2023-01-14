@@ -130,21 +130,39 @@
 
     <DisclosurePanel class="lg:hidden">
       <div class="space-y-1 px-2 pt-2 pb-3">
-        <router-link
-          v-for="{ name, to } in navigation"
-          :key="name"
-          :to="to"
-          class="rounded-md px-3 py-2 text-sm font-medium text-white transition-all duration-150 ease-in-out hover:bg-purple-700 block"
-          >{{ name }}
-        </router-link>
+        <template v-for="{ name, to, needsAuth } in navigation">
+          <router-link
+            v-if="(needsAuth && userLoggedIn) || !needsAuth"
+            :key="name"
+            :to="to"
+            class="rounded-md px-3 py-2 text-sm font-medium text-white transition-all duration-150 ease-in-out hover:bg-purple-700 block"
+            >{{ name }}
+          </router-link>
+        </template>
       </div>
       <div class="border-t border-gray-700 pb-3">
         <div class="mt-3 space-y-1 px-2">
           <DisclosureButton
+            v-if="userLoggedIn"
             as="a"
             href="#"
             class="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-purple-700 transition-all duration-150 ease-in-out"
             >Sign out</DisclosureButton
+          >
+          <template v-else>
+            <DisclosureButton
+              as="a"
+              href="#"
+              class="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-purple-700 transition-all duration-150 ease-in-out"
+              @click.prevent="modal.modalType('login')"
+              >Login</DisclosureButton
+            ><DisclosureButton
+              as="a"
+              href="#"
+              class="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-purple-700 transition-all duration-150 ease-in-out"
+              @click.prevent="modal.modalType('signup')"
+              >Sign up</DisclosureButton
+            ></template
           >
         </div>
       </div>
