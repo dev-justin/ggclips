@@ -91,7 +91,7 @@ if (id.toLowerCase() === user.username.toLowerCase()) {
   getUserDetails(user.username)
     .then((res) => {
       profile.value = res;
-      getClips(res.username);
+      // getClips(res.username);
     })
     .catch((err) => {
       router.push({ name: "home" });
@@ -102,7 +102,7 @@ if (id.toLowerCase() === user.username.toLowerCase()) {
     .then((res) => {
       profile.value = res.reqUser;
       isFollowing.value = res.authUser.following.includes(res.reqUser.username);
-      getClips(res.reqUser.username);
+      // getClips(res.reqUser.username);
     })
     .catch((err) => {
       router.push({ name: "home" });

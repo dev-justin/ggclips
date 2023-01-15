@@ -43,6 +43,9 @@ getRecentClips()
       clips.value.push({ id: doc.id, ...doc.data() });
     });
   })
+  .catch((error) => {
+    console.log("Error getting documents: ", error);
+  })
   .finally(() => {
     loading.value = false;
   });
