@@ -23,5 +23,6 @@ export default async function handler(request, response) {
   return response.json({
     asset_id: asset.id,
     playback_id: asset.playback_ids[0].id,
+    status: asset.status,
   });
 }
