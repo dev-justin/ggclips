@@ -9,7 +9,10 @@
     <!-- Users Clips -->
     <Loaders v-if="loading" />
     <div v-else class="flex flex-col">
-      <div class="flex justify-end -mt-16 sm:-mt-20" v-if="!isOwner">
+      <div
+        class="flex justify-end -mt-16 sm:-mt-20"
+        v-if="!isOwner && user.userLoggedIn"
+      >
         <button
           v-if="!isFollowing"
           type="button"
@@ -27,7 +30,7 @@
           Unfollow
         </button>
       </div>
-      <div v-else>
+      <div v-else-if="user.userLoggedIn">
         <p class="text-lg text-zinc-500">
           This is how you appear to the public.
         </p>
@@ -86,28 +89,28 @@ const isOwner = ref(false);
 const isFollowing = ref(false);
 
 // Get auth user
-if (id.toLowerCase() === user.username.toLowerCase()) {
-  isOwner.value = true;
-  getUserDetails(user.username)
+if (id.toLowerCase() === user.username.toLowerCase() || !user.userLoggedIn) {
+  isOwner.value = user.userLoggedIn;
+  getUserDetails(user.username || id)
     .then((res) => {
       profile.value = res;
       getClips(res.username);
     })
     .catch((err) => {
-      console.log(err);
-      // router.push({ name: "home" });
+      router.push({ name: "home" });
     });
 } else {
   // Get auth and req user
   getAuthAndReqUser(user.username, id)
     .then((res) => {
       profile.value = res.reqUser;
-      isFollowing.value = res.authUser.following.includes(res.reqUser.username);
+      isFollowing.value = res.authUser.following?.includes(
+        res.reqUser.username
+      );
       getClips(res.reqUser.username);
     })
     .catch((err) => {
-      console.log(err);
-      // router.push({ name: "home" });
+      router.push({ name: "home" });
     });
 }
 

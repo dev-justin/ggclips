@@ -158,6 +158,17 @@ const getClipsByUsername = async (username) => {
   return querySnapshot;
 };
 
+// Get all clips where the username is in the following array
+const getFollowingClips = async (following) => {
+  const q = query(
+    collection(db, "clips"),
+    where("username", "in", following),
+    orderBy("date", "desc")
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot;
+};
+
 // Get the 5 most recent clips
 const getRecentClips = async (max) => {
   const q = query(collection(db, "clips"), orderBy("date", "desc"), limit(max));
@@ -214,4 +225,5 @@ export {
   followUser,
   unfollowUser,
   getAuthAndReqUser,
+  getFollowingClips,
 };
