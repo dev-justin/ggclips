@@ -8,7 +8,7 @@
     <Loaders v-if="loading" />
     <template v-else>
       <h3 v-if="!followingList">Follow people to see them appear below.</h3>
-      <div v-else class="flex gap-8">
+      <div v-else class="flex gap-8 flex-wrap">
         <VideoCard
           class="w-[360px]"
           v-for="clip in followingClips"
