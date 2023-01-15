@@ -13,7 +13,7 @@
       </router-link>
     </div>
     <VueVideoPlayer
-      :src="src + '.mp4'"
+      :sources="playerSource"
       class="vjs-theme-forest cc-theme"
       controls
       :volume="0.25"
@@ -77,4 +77,7 @@ const props = defineProps({
     required: true,
   },
 });
+const playerSource = {
+  src: `${props.src}.mp4`,
+};
 </script>

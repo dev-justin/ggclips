@@ -186,7 +186,9 @@ const fileInput = (e) => {
 
 const submit = async (values, { resetForm }) => {
   const storageRef = fbRef(storage, `clips/${values.Title}`);
-  const uploadTask = uploadBytesResumable(storageRef, values.File);
+  const uploadTask = uploadBytesResumable(storageRef, values.File, {
+    cacheControl: "max-age=604800",
+  });
 
   uploadTask.on(
     "state_changed",

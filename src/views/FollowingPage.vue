@@ -45,7 +45,7 @@ const loading = ref(true);
 
 getUserDetails(userStore.username)
   .then((user) => {
-    followingList.value = user.following || false;
+    followingList.value = user.following.length || false;
     if (followingList.value) {
       getFollowingClips(user.following).then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
