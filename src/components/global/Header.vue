@@ -147,6 +147,7 @@
             as="a"
             href="#"
             class="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-purple-700 transition-all duration-150 ease-in-out"
+            @click.prevent="userStore.logout"
             >Sign out</DisclosureButton
           >
           <template v-else>
