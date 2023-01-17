@@ -3,25 +3,17 @@ import { createPinia } from "pinia";
 
 import App from "./App.vue";
 import router from "./router";
-import VueVideoPlayer from "@videojs-player/vue";
 import { auth } from "@/utils/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useUserStore } from "@/stores/user";
 
 import "./assets/base.css";
-import "./assets/videoPlayer.css";
-import "video.js/dist/video-js.css";
-import "@videojs/themes/dist/forest/index.css";
 
 let app;
 
 onAuthStateChanged(auth, (user) => {
   if (!app) {
-    app = createApp(App)
-      .use(createPinia())
-      .use(router)
-      .use(VueVideoPlayer)
-      .mount("#app");
+    app = createApp(App).use(createPinia()).use(router).mount("#app");
   }
 
   const userStore = useUserStore();

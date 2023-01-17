@@ -192,6 +192,14 @@ const unfollowUser = async (currentUser, unfollowUser) => {
   });
 };
 
+// Get users auth token
+const getToken = async () => {
+  const user = auth.currentUser;
+  if (user) {
+    return await user.getIdToken();
+  }
+};
+
 const errorCodes = (code) => {
   switch (code) {
     case "auth/email-already-in-use":
@@ -226,4 +234,5 @@ export {
   unfollowUser,
   getAuthAndReqUser,
   getFollowingClips,
+  getToken,
 };

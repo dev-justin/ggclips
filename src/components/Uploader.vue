@@ -154,15 +154,9 @@ import {
 import { Form, Field, ErrorMessage } from "vee-validate";
 import { uploadForm, configureVeeValidate } from "@/utils/validation";
 import { ref } from "vue";
-import { storage } from "@/utils/firebase";
-import {
-  ref as fbRef,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject as deleteFile,
-} from "firebase/storage";
-import { errorCodes, addClip } from "@/utils/firebase-helpers";
 import { useUserStore } from "@/stores/user";
+import * as UpChunk from "@mux/upchunk";
+import { getToken } from "@/utils/firebase-helpers";
 
 const emit = defineEmits(["clipAdded"]);
 
@@ -185,56 +179,96 @@ const fileInput = (e) => {
 };
 
 const submit = async (values, { resetForm }) => {
-  const storageRef = fbRef(storage, `clips/${values.Title}`);
-  const uploadTask = uploadBytesResumable(storageRef, values.File, {
-    cacheControl: "max-age=604800",
-  });
+  try {
+    const authToken = await getToken();
+    const data = await fetch("http://localhost:3005/getUploadAuth", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(values),
+    });
+    const { url } = await data.json();
 
-  uploadTask.on(
-    "state_changed",
-    (snapshot) => {
-      uploadProgress.value.progress =
-        (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-    },
-    (error) => {
+    const upload = UpChunk.createUpload({
+      endpoint: url,
+      file: values.File,
+      chunkSize: 5120, // Uploads the file in ~5mb chunks
+    });
+
+    // subscribe to events
+    upload.on("error", (err) => {
+      console.error("💥 🙀", err.detail);
+    });
+
+    // Keep track of the upload progress
+    upload.on("progress", (progress) => {
+      uploadProgress.value.progress = progress.detail;
+    });
+
+    // Successfully uploaded the file
+    upload.on("success", () => {
       uploadProgress.value.progress = 0;
-      uploadProgress.value.errorMessage = errorCodes(error.code);
+      files.value = null;
       resetForm();
-    },
-    () => {
-      getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-        addClip({
-          title: values.Title,
-          game: values.Game,
-          size: `${convertBytesToMB(values.File.size)} MB`,
-          url: downloadURL,
-          uid: userStore.uid,
-          username: userStore.username,
-          avatar: userStore.avatar,
-        })
-          .then((data) => {
-            uploadProgress.value.success = true;
-            emit("clipAdded", {
-              title: values.Title,
-              game: values.Game,
-              url: downloadURL,
-              uid: userStore.uid,
-              username: userStore.username,
-              avatar: userStore.avatar,
-              id: data.id,
-              date: { seconds: Math.floor(Date.now() / 1000) },
-            });
-          })
-          .catch((error) => {
-            uploadProgress.value.errorMessage = errorCodes(error.code);
-            deleteFile(storageRef);
-          })
-          .finally(() => {
-            uploadProgress.value.progress = 0;
-            resetForm();
-          });
-      });
-    }
-  );
+    });
+  } catch (error) {
+    console.log("⛔ - Oh No! Something went wrong!", error);
+    uploadProgress.value.progress = 0;
+    files.value = null;
+    resetForm();
+  }
+
+  // const storageRef = fbRef(storage, `clips/${values.Title}`);
+  // const uploadTask = uploadBytesResumable(storageRef, values.File, {
+  //   cacheControl: "max-age=604800",
+  // });
+  // uploadTask.on(
+  //   "state_changed",
+  //   (snapshot) => {
+  //     uploadProgress.value.progress =
+  //       (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+  //   },
+  //   (error) => {
+  //     uploadProgress.value.progress = 0;
+  //     uploadProgress.value.errorMessage = errorCodes(error.code);
+  //     resetForm();
+  //   },
+  //   () => {
+  //     getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+  //       addClip({
+  //         title: values.Title,
+  //         game: values.Game,
+  //         size: `${convertBytesToMB(values.File.size)} MB`,
+  //         url: downloadURL,
+  //         uid: userStore.uid,
+  //         username: userStore.username,
+  //         avatar: userStore.avatar,
+  //       })
+  //         .then((data) => {
+  //           uploadProgress.value.success = true;
+  //           emit("clipAdded", {
+  //             title: values.Title,
+  //             game: values.Game,
+  //             url: downloadURL,
+  //             uid: userStore.uid,
+  //             username: userStore.username,
+  //             avatar: userStore.avatar,
+  //             id: data.id,
+  //             date: { seconds: Math.floor(Date.now() / 1000) },
+  //           });
+  //         })
+  //         .catch((error) => {
+  //           uploadProgress.value.errorMessage = errorCodes(error.code);
+  //           deleteFile(storageRef);
+  //         })
+  //         .finally(() => {
+  //           uploadProgress.value.progress = 0;
+  //           resetForm();
+  //         });
+  //     });
+  //   }
+  // );
 };
 </script>

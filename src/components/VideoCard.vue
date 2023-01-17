@@ -12,15 +12,14 @@
         />
       </router-link>
     </div>
-    <VueVideoPlayer
-      :sources="playerSource"
-      class="vjs-theme-forest cc-theme"
+
+    <video
+      id="mux-default"
+      class="video-js vjs-16-9"
       controls
-      :volume="0.25"
-      :fluid="true"
-      :playbackRates="[0.25, 0.5, 1, 1.5]"
-      :loop="true"
-    />
+      preload="auto"
+      width="100%"
+    ></video>
 
     <div class="flex items-center justify-between pt-4">
       <div
@@ -46,9 +45,25 @@
 </template>
 
 <script setup>
+import { onMounted } from "vue";
 import { EyeIcon } from "@heroicons/vue/20/solid";
+import videojs from "@mux/videojs-kit";
+import "@mux/videojs-kit/dist/index.css";
+
+onMounted(() => {
+  const player = videojs("mux-default", {
+    playbackRates: [0.25, 0.5, 1, 1.5],
+    loop: true,
+  });
+
+  player.src({
+    src: "6e02b7902hoKsThOc7hQ3unVG1k1ycR75YF71laqJJWjI",
+    type: "video/mux",
+  });
+});
+
 const props = defineProps({
-  src: {
+  playback: {
     type: String,
     required: true,
   },
@@ -77,7 +92,4 @@ const props = defineProps({
     required: true,
   },
 });
-const playerSource = {
-  src: `${props.src}.mp4`,
-};
 </script>
