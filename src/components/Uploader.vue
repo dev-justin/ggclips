@@ -181,7 +181,7 @@ const fileInput = (e) => {
 const submit = async (values, { resetForm }) => {
   try {
     const authToken = await getToken();
-    const data = await fetch("http://localhost:3005/getUploadAuth", {
+    const data = await fetch("/api/getUploadAuth", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${authToken}`,
