@@ -35,21 +35,11 @@ const router = createRouter({
       name: "user",
       component: () => import("../views/UserPage.vue"),
     },
-    {
-      path: "/api",
-      name: "api",
-      redirect: "https://ggclips.io/api",
-    },
     // Catch all 404
     {
       path: "/:catchAll(.*)",
       name: "not-found",
       component: () => import("../views/NotFoundPage.vue"),
-      beforeEnter: (to, from, next) => {
-        if (!to.path.startsWith("/api")) {
-          next();
-        }
-      },
     },
   ],
   linkExactActiveClass: "bg-purple-700",
