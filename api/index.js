@@ -39,7 +39,7 @@ admin.initializeApp({
 
 // Middleware to check if user is authenticated 🔐 (mux-webhook doesn't need this)
 app.use((req, res, next) => {
-  if (req.path !== "/mux-webhook") {
+  if (req.path !== "/api/mux-webhook") {
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer ")
@@ -70,7 +70,7 @@ const { Video } = new Mux(
 );
 
 // Return the Mux auth URL (needed so client can upload file to Mux) 🗃️
-app.post("/getUploadAuth", (req, res) => {
+app.post("/api/getUploadAuth", (req, res) => {
   const videoData = {
     title: req.body.Title,
     game: req.body.Game,
@@ -97,8 +97,8 @@ app.post("/getUploadAuth", (req, res) => {
     });
 });
 
-// TODO: Create a webhook to listen for Mux events and update Firestore accordingly
-app.post("/mux-webhook", async (req, res) => {
+// Mux webhook
+app.post("/api/mux-webhook", async (req, res) => {
   const { type } = req.body;
   if (type == "video.asset.ready") {
     // Get Mux data from event
