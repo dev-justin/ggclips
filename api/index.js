@@ -147,11 +147,6 @@ app.get("/api/games", async (req, res) => {
   const cachedGames = await redis.get("games");
 
   if (cachedGames) {
-    // Set appropriate headers for cache
-    res.set("x-cache", "HIT");
-    res.set("Cache-Control", "max-age=86400");
-    res.set("Expires", new Date(Date.now() + 86400 * 1000).toUTCString());
-
     return res.json({ source: "cache", games: JSON.parse(cachedGames) });
   } else {
     try {
@@ -195,11 +190,6 @@ app.get("/api/games", async (req, res) => {
           .replace("{width}", "285")
           .replace("{height}", "380"),
       }));
-
-      // Set appropiate headers
-      res.set("x-cache", "MISS");
-      res.set("Cache-Control", "no-cache, no-store, must-revalidate");
-      res.set("Expires", new Date(Date.now() - 1 * 1000).toUTCString());
 
       // Set games list in cache for 24 hours
       redis.set("games", JSON.stringify(gamesList), "EX", 86400);
