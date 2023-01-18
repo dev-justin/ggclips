@@ -8,7 +8,6 @@ const admin = require("firebase-admin");
 const axios = require("axios");
 const qs = require("qs");
 const NodeCache = require("node-cache");
-const e = require("express");
 
 // Init Express & dotenv
 const app = express();
