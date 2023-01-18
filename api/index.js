@@ -7,7 +7,7 @@ const Mux = require("@mux/mux-node");
 const admin = require("firebase-admin");
 const axios = require("axios");
 const qs = require("qs");
-const NodeCache = require("node-cache");
+const Redis = require("ioredis");
 
 // Init Express & dotenv
 const app = express();
@@ -23,8 +23,12 @@ app.use(
 // Init Body Parser
 app.use(bodyParser.json());
 
-// Init Cache (for Twitch API) [Caching for 24 hours]
-const myCache = new NodeCache({ stdTTL: 86400 });
+// Init redis cache
+const redis = new Redis({
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+  password: process.env.REDIS_PASSWORD,
+});
 
 // Init Firebase
 const serviceAccount = {
@@ -103,7 +107,7 @@ app.post("/api/getUploadAuth", (req, res) => {
     });
 });
 
-// Mux webhook
+// Mux webhook 🪝
 app.post("/api/mux-webhook", async (req, res) => {
   const { type } = req.body;
   if (type == "video.asset.ready") {
@@ -140,10 +144,15 @@ app.post("/api/mux-webhook", async (req, res) => {
 // Get games list from Twitch API 🕹️
 app.get("/api/games", async (req, res) => {
   // Check if games list is cached
-  const cachedGames = myCache.get("games");
+  const cachedGames = await redis.get("games");
 
   if (cachedGames) {
-    return res.json({ source: "cache", games: cachedGames });
+    // Set appropriate headers for cache
+    res.set("x-cache", "HIT");
+    res.set("Cache-Control", "max-age=86400");
+    res.set("Expires", new Date(Date.now() + 86400 * 1000).toUTCString());
+
+    return res.json({ source: "cache", games: JSON.parse(cachedGames) });
   } else {
     try {
       // Get access token from Twitch API
@@ -187,13 +196,25 @@ app.get("/api/games", async (req, res) => {
           .replace("{height}", "380"),
       }));
 
-      // Set games list in cache
-      myCache.set("games", gamesList);
+      // Set appropiate headers
+      res.set("x-cache", "MISS");
+      res.set("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.set("Expires", new Date(Date.now() - 1 * 1000).toUTCString());
+
+      // Set games list in cache for 24 hours
+      redis.set("games", JSON.stringify(gamesList), "EX", 86400);
       res.json({ state: "origin", games: gamesList });
     } catch {
       res.status(500).json({ error: "Issue fetching games list" });
     }
   }
+});
+
+// Close Redis connection on exit
+process.on("SIGINT", () => {
+  console.log("Closing Redis client connection...");
+  redis.disconnect();
+  process.exit();
 });
 
 // app.listen(
