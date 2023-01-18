@@ -40,15 +40,18 @@ const registerForm = {
 const uploadForm = {
   schema: {
     Title: "required|min:3|max:20",
-    Game: "required|min:3",
+    Game: "required|min:3|isGame",
     File: "required|mimes:mp4,mov|size:100000",
   },
-  definitions: () => {
+  definitions: (gamesList) => {
     defineRule("required", required);
     defineRule("min", min);
     defineRule("max", max);
     defineRule("mimes", mimes);
     defineRule("size", size);
+    defineRule("isGame", (value) => {
+      return gamesList.includes(value);
+    });
   },
 };
 
@@ -64,6 +67,7 @@ const configureVeeValidate = () => {
         confirmed: `password does not match`,
         mimes: `File type is not supported`,
         size: `File size is too large`,
+        isGame: `Game is not supported`,
       };
 
       const message = messages[ctx.rule.name]

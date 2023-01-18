@@ -3,17 +3,26 @@ import { createPinia } from "pinia";
 
 import App from "./App.vue";
 import router from "./router";
+import Toast from "vue-toastification";
 import { auth } from "@/utils/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useUserStore } from "@/stores/user";
 
+import "vue-toastification/dist/index.css";
 import "./assets/base.css";
 
 let app;
 
 onAuthStateChanged(auth, (user) => {
   if (!app) {
-    app = createApp(App).use(createPinia()).use(router).mount("#app");
+    app = createApp(App)
+      .use(createPinia())
+      .use(router)
+      .use(Toast, {
+        maxToasts: 2,
+        toastClassName: "brand",
+      })
+      .mount("#app");
   }
 
   const userStore = useUserStore();

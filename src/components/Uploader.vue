@@ -1,5 +1,7 @@
 <template>
+  <Loaders v-if="!gamesList.length" />
   <Form
+    v-else
     @submit="submit"
     :validation-schema="uploadForm.schema"
     class="flex flex-col gap-4 text-purple-700"
@@ -33,10 +35,40 @@
           <Field
             type="text"
             name="Game"
+            :attributes="{
+              autocomplete: 'off',
+            }"
+            @input="searchGames"
+            @blur="searchResults = null"
+            v-model="searchTerm"
             class="block w-full rounded-md border-gray-300 pl-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:cursor-not-allowed"
             placeholder="Game being played"
             :disabled="uploadProgress.progress"
           />
+          <!-- Games List Results -->
+          <div
+            v-if="searchResults"
+            class="absolute z-10 bg-white w-full rounded-md shadow-lg overflow-clip"
+          >
+            <ul class="divide-y divide-zinc-200">
+              <li
+                v-for="game in searchResults.slice(0, 5)"
+                :key="game.id"
+                class="px-3 py-2 hover:bg-zinc-200 cursor-pointer"
+                @click="(searchTerm = game.name), (searchResults = null)"
+                @mousedown.prevent
+              >
+                <div class="flex items-center">
+                  <img
+                    :src="game.box_art_url"
+                    :alt="game.name + ' Cover'"
+                    class="h-14 mr-2 inline-block object-cover"
+                  />
+                  <span>{{ game.name }}</span>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -154,20 +186,45 @@ import {
 import { Form, Field, ErrorMessage } from "vee-validate";
 import { uploadForm, configureVeeValidate } from "@/utils/validation";
 import { ref } from "vue";
-import { useUserStore } from "@/stores/user";
 import * as UpChunk from "@mux/upchunk";
 import { getToken } from "@/utils/firebase-helpers";
+import Loaders from "@/components/common/Loaders.vue";
+import { useToast } from "vue-toastification";
 
 const emit = defineEmits(["clipAdded"]);
 
-const userStore = useUserStore();
+// States
+const files = ref(null);
+const gamesList = ref([]);
+const searchTerm = ref("");
+const searchResults = ref([]);
 const uploadProgress = ref({
   progress: 0,
   errorMessage: "",
 });
-const files = ref(null);
+
+// Setup toast notifications
+const toast = useToast();
+
+// Setup vee-validate
 configureVeeValidate();
-uploadForm.definitions();
+
+// Get list of games for search
+fetch("/api/games")
+  .then((res) => res.json())
+  .then((data) => {
+    gamesList.value = data.games;
+    uploadForm.definitions(gamesList.value.map((game) => game.name));
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+
+const searchGames = () => {
+  searchResults.value = gamesList.value.filter((game) => {
+    return game.name.toLowerCase().includes(searchTerm.value.toLowerCase());
+  });
+};
 
 const convertBytesToMB = (bytes) => {
   const size = bytes / 1000000;
@@ -212,63 +269,17 @@ const submit = async (values, { resetForm }) => {
       uploadProgress.value.progress = 0;
       files.value = null;
       resetForm();
+      toast.success(
+        "Clip uploaded successfully! We are processing it now. It will be available in a few minutes."
+      );
     });
   } catch (error) {
-    console.log("⛔ - Oh No! Something went wrong!", error);
     uploadProgress.value.progress = 0;
     files.value = null;
     resetForm();
+    toast.error(
+      "We are having issues processing your request. Please try again later."
+    );
   }
-
-  // const storageRef = fbRef(storage, `clips/${values.Title}`);
-  // const uploadTask = uploadBytesResumable(storageRef, values.File, {
-  //   cacheControl: "max-age=604800",
-  // });
-  // uploadTask.on(
-  //   "state_changed",
-  //   (snapshot) => {
-  //     uploadProgress.value.progress =
-  //       (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-  //   },
-  //   (error) => {
-  //     uploadProgress.value.progress = 0;
-  //     uploadProgress.value.errorMessage = errorCodes(error.code);
-  //     resetForm();
-  //   },
-  //   () => {
-  //     getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-  //       addClip({
-  //         title: values.Title,
-  //         game: values.Game,
-  //         size: `${convertBytesToMB(values.File.size)} MB`,
-  //         url: downloadURL,
-  //         uid: userStore.uid,
-  //         username: userStore.username,
-  //         avatar: userStore.avatar,
-  //       })
-  //         .then((data) => {
-  //           uploadProgress.value.success = true;
-  //           emit("clipAdded", {
-  //             title: values.Title,
-  //             game: values.Game,
-  //             url: downloadURL,
-  //             uid: userStore.uid,
-  //             username: userStore.username,
-  //             avatar: userStore.avatar,
-  //             id: data.id,
-  //             date: { seconds: Math.floor(Date.now() / 1000) },
-  //           });
-  //         })
-  //         .catch((error) => {
-  //           uploadProgress.value.errorMessage = errorCodes(error.code);
-  //           deleteFile(storageRef);
-  //         })
-  //         .finally(() => {
-  //           uploadProgress.value.progress = 0;
-  //           resetForm();
-  //         });
-  //     });
-  //   }
-  // );
 };
 </script>

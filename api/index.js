@@ -5,6 +5,10 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const Mux = require("@mux/mux-node");
 const admin = require("firebase-admin");
+const axios = require("axios");
+const qs = require("qs");
+const NodeCache = require("node-cache");
+const e = require("express");
 
 // Init Express & dotenv
 const app = express();
@@ -19,6 +23,9 @@ app.use(
 
 // Init Body Parser
 app.use(bodyParser.json());
+
+// Init Cache (for Twitch API) [Caching for 24 hours]
+const myCache = new NodeCache({ stdTTL: 86400 });
 
 // Init Firebase
 const serviceAccount = {
@@ -39,7 +46,7 @@ admin.initializeApp({
 
 // Middleware to check if user is authenticated 🔐 (mux-webhook doesn't need this)
 app.use((req, res, next) => {
-  if (req.path !== "/api/mux-webhook") {
+  if (req.path !== "/api/mux-webhook" && req.path !== "/api/games") {
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer ")
@@ -53,10 +60,10 @@ app.use((req, res, next) => {
           next();
         })
         .catch((error) => {
-          res.status(401).send("Unauthorized");
+          res.status(401).send("Unauthorized ⛔");
         });
     } else {
-      res.status(401).send("Unauthorized");
+      res.status(401).send("Unauthorized ⛔");
     }
   } else {
     next();
@@ -129,6 +136,65 @@ app.post("/api/mux-webhook", async (req, res) => {
   }
   // Let Mux know we received the event
   res.status(200).send("Event received");
+});
+
+// Get games list from Twitch API 🕹️
+app.get("/api/games", async (req, res) => {
+  // Check if games list is cached
+  const cachedGames = myCache.get("games");
+
+  if (cachedGames) {
+    return res.json({ source: "cache", games: cachedGames });
+  } else {
+    try {
+      // Get access token from Twitch API
+      const twitchAuth = await axios({
+        method: "post",
+        url: "https://id.twitch.tv/oauth2/token",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        data: qs.stringify({
+          client_id: process.env.TWITCH_CLIENT_ID,
+          client_secret: process.env.TWITCH_CLIENT_SECRET,
+          grant_type: "client_credentials",
+        }),
+      });
+      // Throw error if no access token
+      if (!twitchAuth.data.access_token)
+        return res
+          .status(500)
+          .json({ error: "Can't fetch access token for Twitch API" });
+
+      const { access_token } = twitchAuth.data;
+      // Get games list from Twitch API
+      const games = await axios({
+        method: "get",
+        url: "https://api.twitch.tv/helix/games/top?first=100",
+        headers: {
+          "Client-Id": process.env.TWITCH_CLIENT_ID,
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+      // Throw error if no games returned
+      if (!games.data.data)
+        return res.status(500).json({ error: "Issue fetching games list" });
+
+      // Return only the name and box art
+      const gamesList = games.data.data.map((game) => ({
+        name: game.name,
+        box_art_url: game.box_art_url
+          .replace("{width}", "285")
+          .replace("{height}", "380"),
+      }));
+
+      // Set games list in cache
+      myCache.set("games", gamesList);
+      res.json({ state: "origin", games: gamesList });
+    } catch {
+      res.status(500).json({ error: "Issue fetching games list" });
+    }
+  }
 });
 
 // app.listen(

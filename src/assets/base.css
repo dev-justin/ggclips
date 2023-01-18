@@ -15,3 +15,16 @@ main {
 main a.router-link-active {
   @apply bg-transparent;
 }
+
+/* Toast Notis */
+.Vue-Toastification__toast--success.brand {
+  @apply bg-purple-700;
+}
+.Vue-Toastification__toast--error.brand {
+  @apply bg-red-900;
+}
+@media screen and (min-width: 640px) {
+  .Vue-Toastification__container.top-right {
+    @apply top-20;
+  }
+}

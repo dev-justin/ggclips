@@ -13,14 +13,10 @@
       </router-link>
     </div>
 
-    <video
-      id="mux-default"
-      class="video-js vjs-16-9"
-      controls
-      preload="auto"
-      width="100%"
-    ></video>
-
+    <!-- <mux-player
+      stream-type="on-demand"
+      playback-id="23s11nz72DsoN657h4314PjKKjsF2JG33eBQQt6B95I"
+    ></mux-player> -->
     <div class="flex items-center justify-between pt-4">
       <div
         class="bg-red-200 inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase text-red-900"
@@ -45,22 +41,8 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue";
 import { EyeIcon } from "@heroicons/vue/20/solid";
-import videojs from "@mux/videojs-kit";
-import "@mux/videojs-kit/dist/index.css";
-
-onMounted(() => {
-  const player = videojs("mux-default", {
-    playbackRates: [0.25, 0.5, 1, 1.5],
-    loop: true,
-  });
-
-  player.src({
-    src: "6e02b7902hoKsThOc7hQ3unVG1k1ycR75YF71laqJJWjI",
-    type: "video/mux",
-  });
-});
+import "@mux/mux-player";
 
 const props = defineProps({
   playback: {

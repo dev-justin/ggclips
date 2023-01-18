@@ -34,6 +34,15 @@
         </div>
       </div>
     </div>
+    <VideoCard
+      title="clip.title"
+      src="clip.url"
+      game="clip.game"
+      username="clip.username"
+      avatar="clip.avatar"
+      date="convertDate(clip.date)"
+      id="clip.id"
+    />
   </main>
 </template>
 
