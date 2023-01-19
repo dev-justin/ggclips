@@ -82,10 +82,11 @@ const { Video } = new Mux(
 // Return the Mux auth URL (needed so client can upload file to Mux) 🗃️
 app.post("/api/getUploadAuth", (req, res) => {
   const videoData = {
-    title: req.body.Title,
-    game: req.body.Game,
+    title: req.body.title,
+    game: req.body.game,
     userId: req.user.name,
   };
+  console.log(videoData);
 
   if (!videoData.title || !videoData.game || !videoData.userId)
     return res.status(400).json({ error: "Missing required fields" });

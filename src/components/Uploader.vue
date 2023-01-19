@@ -244,7 +244,10 @@ const submit = async (values, { resetForm }) => {
         Authorization: `Bearer ${authToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(values),
+      body: JSON.stringify({
+        title: values.Title,
+        game: values.Game,
+      }),
     });
     const { url } = await data.json();
 
