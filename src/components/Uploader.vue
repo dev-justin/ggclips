@@ -1,7 +1,5 @@
 <template>
-  <Loaders v-if="!gamesList.length" />
   <Form
-    v-else
     @submit="submit"
     :validation-schema="uploadForm.schema"
     class="flex flex-col gap-4 text-purple-700"
@@ -13,14 +11,22 @@
           <div
             class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
           >
-            <VideoCameraIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
+            <VideoCameraIcon
+              class="h-5 w-5 text-gray-400"
+              :class="{ 'text-transparent': pageLoading }"
+              aria-hidden="true"
+            />
           </div>
           <Field
             type="text"
             name="Title"
             class="block w-full rounded-md border-gray-300 pl-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:cursor-not-allowed"
+            :class="{
+              'animate-pulse bg-zinc-800 placeholder:text-transparent text-transparent border-none':
+                pageLoading,
+            }"
             placeholder="Clip Title"
-            :disabled="uploadProgress.progress"
+            :disabled="uploadProgress.progress || pageLoading"
           />
         </div>
       </div>
@@ -30,7 +36,11 @@
           <div
             class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
           >
-            <PuzzlePieceIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
+            <PuzzlePieceIcon
+              class="h-5 w-5 text-gray-400"
+              aria-hidden="true"
+              :class="{ 'text-transparent': pageLoading }"
+            />
           </div>
           <Field
             type="text"
@@ -42,8 +52,12 @@
             @blur="searchResults = null"
             v-model="searchTerm"
             class="block w-full rounded-md border-gray-300 pl-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:cursor-not-allowed"
+            :class="{
+              'animate-pulse bg-zinc-800 placeholder:text-transparent text-transparent border-none':
+                pageLoading,
+            }"
             placeholder="Game being played"
-            :disabled="uploadProgress.progress"
+            :disabled="uploadProgress.progress || pageLoading"
           />
           <!-- Games List Results -->
           <div
@@ -80,15 +94,20 @@
           uploadProgress.progress
             ? 'bg-gray-500 cursor-not-allowed'
             : 'bg-zinc-800 hover:bg-zinc-700',
+          pageLoading ? 'bg-zinc-800 animate-pulse' : '',
         ]"
       >
-        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+        <div
+          class="flex flex-col items-center justify-center pt-5 pb-6"
+          v-if="!pageLoading"
+        >
           <svg
             aria-hidden="true"
             class="w-10 h-10 mb-3"
             :class="{
               'text-gray-400': uploadProgress.progress,
               'text-purple-700': !uploadProgress.progress,
+              'text-transparent': pageLoading,
             }"
             fill="none"
             stroke="currentColor"
@@ -114,7 +133,7 @@
           id="dropzone-file"
           type="file"
           class="hidden"
-          :disabled="uploadProgress.progress"
+          :disabled="uploadProgress.progress || pageLoading"
         />
       </label>
     </div>
@@ -129,8 +148,13 @@
 
     <button
       type="submit"
-      :disabled="uploadProgress.progress"
-      class="bg-purple-700 text-white px-4 py-4 rounded-md font-semibold hover:bg-purple-900 transition-all duration-150 ease-in-out disabled:bg-gray-500 disabled:cursor-not-allowed disabled:text-gray-400"
+      :disabled="uploadProgress.progress || pageLoading"
+      class="bg-purple-700 text-white px-4 py-4 rounded-md font-semibold hover:bg-purple-900 transition-all duration-150 ease-in-out disabled:cursor-not-allowed"
+      :class="[
+        pageLoading
+          ? 'bg-zinc-800 animate-pulse text-transparent'
+          : 'disabled:bg-gray-500 disabled:text-gray-400',
+      ]"
     >
       Upload
     </button>
@@ -194,6 +218,7 @@ import { useToast } from "vue-toastification";
 const emit = defineEmits(["clipAdded"]);
 
 // States
+const pageLoading = ref(true);
 const files = ref(null);
 const gamesList = ref([]);
 const searchTerm = ref("");
@@ -218,6 +243,9 @@ fetch("/api/games")
   })
   .catch((err) => {
     console.log(err);
+  })
+  .finally(() => {
+    pageLoading.value = false;
   });
 
 const searchGames = () => {
