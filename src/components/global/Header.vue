@@ -55,6 +55,9 @@
                 @input.once="search"
                 @input="filterResults"
                 @blur="searchResults = {}"
+                :attributes="{
+                  autocomplete: 'off',
+                }"
                 id="search"
                 name="search"
                 class="block w-full rounded-md border-none bg-zinc-800 py-2 pl-10 pr-3 leading-5 placeholder-zinc-400 focus:text-white focus:outline-none focus:ring-purple-700 focus:ring-2 sm:text-sm"
