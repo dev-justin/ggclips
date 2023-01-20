@@ -200,6 +200,15 @@ const getToken = async () => {
   }
 };
 
+// Get all usernames and clips
+const getAllUsersAndClips = async () => {
+  const userQuery = query(collection(db, "usernames"));
+  const clipQuery = query(collection(db, "clips"));
+  const userQuerySnapshot = await getDocs(userQuery);
+  const clipQuerySnapshot = await getDocs(clipQuery);
+  return { userQuerySnapshot, clipQuerySnapshot };
+};
+
 const errorCodes = (code) => {
   switch (code) {
     case "auth/email-already-in-use":
@@ -235,4 +244,5 @@ export {
   getAuthAndReqUser,
   getFollowingClips,
   getToken,
+  getAllUsersAndClips,
 };

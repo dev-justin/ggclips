@@ -6,7 +6,7 @@ import AuthForms from "@/components/forms/AuthForms.vue";
 
 <template>
   <Header />
-  <router-view />
+  <router-view :key="$route.fullPath" />
   <Footer />
   <AuthForms />
 </template>

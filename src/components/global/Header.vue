@@ -39,7 +39,7 @@
           </div>
         </div>
         <div class="flex flex-1 justify-center px-2 lg:ml-6 lg:justify-end">
-          <div class="w-full max-w-lg lg:max-w-xs">
+          <div class="w-full max-w-lg lg:max-w-xs relative">
             <label for="search" class="sr-only">Search</label>
             <div class="relative">
               <div
@@ -51,12 +51,83 @@
                 />
               </div>
               <input
+                v-model="searchTerm"
+                @input.once="search"
+                @input="filterResults"
+                @blur="searchResults = {}"
                 id="search"
                 name="search"
                 class="block w-full rounded-md border-none bg-zinc-800 py-2 pl-10 pr-3 leading-5 placeholder-zinc-400 focus:text-white focus:outline-none focus:ring-purple-700 focus:ring-2 sm:text-sm"
                 placeholder="Search"
                 type="search"
               />
+              <DotLoader
+                class="w-14 h-14 absolute -top-2 -right-2"
+                v-if="searchLoading"
+              />
+            </div>
+            <div
+              v-if="searchResults.users?.length || searchResults.clips?.length"
+              class="absolute z-10 bg-zinc-800 shadow-lg overflow-clip w-full border-purple-700 border-2 rounded-md mt-1"
+            >
+              <ul class="divide-y divide-zinc-700">
+                <li
+                  v-for="result in searchResults.users"
+                  :key="result.id"
+                  class="px-3 py-2 hover:bg-zinc-700 cursor-pointer"
+                  @mousedown.prevent
+                >
+                  <router-link
+                    :to="{
+                      name: 'user',
+                      params: { id: result.id },
+                    }"
+                  >
+                    <div class="flex items-center gap-4 py-1">
+                      <img
+                        :src="result.avatar"
+                        :alt="result.username + ' Profile Picture'"
+                        class="flex rounded-full bg-gray-800 text-sm text-white ring-white ring-2 w-6 h-6"
+                      />
+                      <div class="flex gap-2">
+                        <span class="text-zinc-500">User</span>
+                        <span class="text-purple-700 font-semibold">{{
+                          result.username
+                        }}</span>
+                      </div>
+                    </div>
+                  </router-link>
+                </li>
+                <li
+                  v-for="result in searchResults.clips"
+                  :key="result.id"
+                  class="px-3 py-2 hover:bg-zinc-700 cursor-pointer"
+                  @mousedown.prevent
+                >
+                  <router-link
+                    :to="{ name: 'clip', params: { id: result.id } }"
+                  >
+                    <div class="flex py-1 flex-col">
+                      <div class="flex gap-2 text-zinc-500">
+                        <span
+                          >Clip
+                          <span class="text-purple-700 font-semibold">{{
+                            result.title
+                          }}</span>
+                          by {{ result.username }}</span
+                        >
+                      </div>
+                      <div>
+                        <div
+                          class="bg-red-200 inline-flex px-[6px] py-[1px] rounded-full text-xs font-bold uppercase text-red-900 opacity-50"
+                        >
+                          <span>{{ result.game }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </router-link>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -183,10 +254,13 @@ import {
 } from "@headlessui/vue";
 import { MagnifyingGlassIcon } from "@heroicons/vue/20/solid";
 import { Bars3Icon, XMarkIcon } from "@heroicons/vue/24/outline";
+import { ref } from "vue";
 import LogoSvg from "@/components/icons/LogoSvg.vue";
+import DotLoader from "@/components/icons/DotLoader.vue";
 import { useModalStore } from "@/stores/modal";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
+import { getAllUsersAndClips } from "@/utils/firebase-helpers";
 
 const userStore = useUserStore();
 const { userLoggedIn } = storeToRefs(userStore);
@@ -197,4 +271,60 @@ const navigation = [
   { name: "Following", to: { name: "following" }, needsAuth: true },
   { name: "Profile", to: { name: "profile" }, needsAuth: true },
 ];
+
+const searchTerm = ref("");
+const searchDBQuery = ref({});
+const searchResults = ref({});
+const searchLoading = ref(false);
+
+const search = async () => {
+  searchLoading.value = true;
+  searchDBQuery.value.loading = true;
+  const dbQuery = await getAllUsersAndClips();
+  const clips = dbQuery.clipQuerySnapshot.docs.map((doc) => {
+    return {
+      username: doc.data().username,
+      title: doc.data().title,
+      game: doc.data().game,
+      id: doc.id,
+    };
+  });
+  const users = dbQuery.userQuerySnapshot.docs.map((doc) => {
+    return {
+      username: doc.id,
+      avatar: doc.data().photoURL,
+      id: doc.id,
+    };
+  });
+
+  searchDBQuery.value = {
+    clips,
+    users,
+  };
+  searchLoading.value = false;
+};
+
+const filterResults = () => {
+  if (searchDBQuery.value.users && searchDBQuery.value.clips) {
+    const filteredClips = searchDBQuery.value.clips.filter((clip) => {
+      return (
+        clip.username.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+        clip.title.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+        clip.game.toLowerCase().includes(searchTerm.value.toLowerCase())
+      );
+    });
+
+    const filteredUsers = searchDBQuery.value.users.filter((user) => {
+      return user.username
+        .toLowerCase()
+        .includes(searchTerm.value.toLowerCase());
+    });
+
+    searchResults.value = {
+      // Only return max 3 results of each type
+      clips: filteredClips.slice(0, 3),
+      users: filteredUsers.slice(0, 3),
+    };
+  }
+};
 </script>
