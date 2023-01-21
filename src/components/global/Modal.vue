@@ -29,7 +29,7 @@
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <DialogPanel
-              class="relative transform overflow-hidden rounded-lg p-8 text-left shadow-xl transition-all sm:w-full sm:max-w-sm text-black bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-200 via-zinc-200 to-purple-200"
+              class="relative transform overflow-hidden rounded-lg p-8 text-left shadow-xl transition-all w-full sm:max-w-sm text-black bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-200 via-zinc-200 to-purple-200"
             >
               <DialogTitle
                 as="h3"

@@ -8,8 +8,12 @@
       <p>{{ successMessage }}</p>
     </div>
     <div v-else>
-      <div class="flex items-center justify-center pt-8" v-if="submitting">
+      <div
+        class="flex items-center justify-center pt-8 flex-col gap-8"
+        v-if="submitting"
+      >
         <Loaders />
+        <span class="text-zinc-500">logging you in...</span>
       </div>
       <Form
         v-else

@@ -7,7 +7,12 @@
   />
   <main>
     <!-- Users Clips -->
-    <Loaders v-if="loading" />
+    <div
+      v-if="loading"
+      class="flex justify-center items-center h-[calc(100vh-298px)]"
+    >
+      <Loaders />
+    </div>
     <div v-else class="flex flex-col">
       <div
         class="flex justify-end -mt-16 sm:-mt-20"
