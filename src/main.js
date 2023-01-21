@@ -10,6 +10,7 @@ import { useUserStore } from "@/stores/user";
 
 import "vue-toastification/dist/index.css";
 import "./assets/base.css";
+import "./assets/videoPlayer.css";
 
 let app;
 

@@ -1,16 +1,18 @@
 <template>
-  <VueVideoPlayer
-    :src="src + '.mp4'"
+  <VideoPlayer
     class="vjs-theme-forest cc-theme"
+    :src="`https://stream.mux.com/LHVWqnnwrnvQgR7GVmTl00BtBB7aG6BZUuCLnIMgNFBg.m3u8`"
+    fluid
     controls
-    :fluid="true"
+    :playbackRates="[0.5, 1, 1.5]"
     :volume="0.25"
-    :playbackRates="[0.25, 0.5, 1, 1.5]"
-    :loop="true"
   />
 </template>
 
 <script setup>
+import { VideoPlayer } from "@videojs-player/vue";
+import "video.js/dist/video-js.css";
+import "@videojs/themes/dist/forest/index.css";
 const props = defineProps({
   src: {
     type: String,

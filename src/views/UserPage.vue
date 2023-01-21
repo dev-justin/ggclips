@@ -9,7 +9,7 @@
     <!-- Users Clips -->
     <div
       v-if="loading"
-      class="flex justify-center items-center h-[calc(100vh-298px)]"
+      class="flex justify-center items-center min-h-[calc(100vh-298px)]"
     >
       <Loaders />
     </div>

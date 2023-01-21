@@ -17,7 +17,7 @@
               :game="clip.game"
               :username="clip.username"
               :avatar="clip.avatar"
-              :date="convertDate(clip.date)"
+              :date="clip.date"
               :id="clip.id"
             />
           </div>

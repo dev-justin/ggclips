@@ -4,10 +4,19 @@
     subline="Your friends clips will be shown here."
     background="https://images.pexels.com/photos/7130475/pexels-photo-7130475.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
   />
-  <main>
-    <Loaders v-if="loading" />
+  <main class="min-h-[calc(100vh-472px)]">
+    <div
+      v-if="loading"
+      class="flex justify-center items-center pt-12 flex-col gap-8"
+    >
+      <Loaders />
+      <span class="text-zinc-500">Loading following...</span>
+    </div>
     <template v-else>
       <h3 v-if="!followingList">Follow people to see them appear below.</h3>
+      <h3 v-else-if="!followingClips.length">
+        Once your following have uploaded a clip it will show here.
+      </h3>
       <div v-else class="flex gap-8 flex-wrap">
         <VideoCard
           class="w-[360px]"

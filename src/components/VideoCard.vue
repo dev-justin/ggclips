@@ -13,10 +13,15 @@
       </router-link>
     </div>
 
-    <!-- <mux-player
-      stream-type="on-demand"
-      playback-id="23s11nz72DsoN657h4314PjKKjsF2JG33eBQQt6B95I"
-    ></mux-player> -->
+    <VideoPlayer
+      class="vjs-theme-forest cc-theme rounded-md overflow-clip"
+      :src="`https://stream.mux.com/LHVWqnnwrnvQgR7GVmTl00BtBB7aG6BZUuCLnIMgNFBg.m3u8`"
+      fluid
+      controls
+      :playbackRates="[0.5, 1, 1.5]"
+      :volume="0.25"
+    />
+
     <div class="flex items-center justify-between pt-4">
       <div
         class="bg-red-200 inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase text-red-900"
@@ -42,7 +47,9 @@
 
 <script setup>
 import { EyeIcon } from "@heroicons/vue/20/solid";
-import "@mux/mux-player";
+import { VideoPlayer } from "@videojs-player/vue";
+import "video.js/dist/video-js.css";
+import "@videojs/themes/dist/forest/index.css";
 
 const props = defineProps({
   playback: {

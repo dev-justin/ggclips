@@ -128,7 +128,7 @@ app.post("/api/mux-webhook", async (req, res) => {
       // Add clip to Firestore
       await admin.firestore().collection("clips").add({
         avatar: photoURL,
-        date: new Date().toISOString(),
+        date: new Date(),
         game,
         title,
         username: userId,
