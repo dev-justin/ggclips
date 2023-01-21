@@ -11,13 +11,13 @@
         leave-to="opacity-0"
       >
         <div
-          class="fixed inset-0 bg-zinc-600 bg-opacity-75 transition-opacity"
+          class="fixed inset-0 bg-zinc-800 backdrop-blur-sm bg-opacity-75 transition-opacity"
         />
       </TransitionChild>
 
       <div class="fixed inset-0 z-10 overflow-y-auto">
         <div
-          class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0"
+          class="flex min-h-full justify-center p-8 text-center items-start sm:items-center sm:p-0"
         >
           <TransitionChild
             as="template"
@@ -29,7 +29,7 @@
             leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <DialogPanel
-              class="relative transform overflow-hidden rounded-lg px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6 text-black bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-slate-100 to-zinc-300"
+              class="relative transform overflow-hidden rounded-lg p-8 text-left shadow-xl transition-all sm:w-full sm:max-w-sm text-black bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-200 via-zinc-200 to-purple-200"
             >
               <DialogTitle
                 as="h3"

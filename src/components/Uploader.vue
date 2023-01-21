@@ -94,7 +94,9 @@
           uploadProgress.progress
             ? 'bg-gray-500 cursor-not-allowed'
             : 'bg-zinc-800 hover:bg-zinc-700',
-          pageLoading ? 'bg-zinc-800 animate-pulse' : '',
+          pageLoading
+            ? 'bg-zinc-800 animate-pulse cursor-not-allowed hover:bg-zinc-800'
+            : '',
         ]"
       >
         <div
@@ -240,12 +242,12 @@ fetch("/api/games")
   .then((data) => {
     gamesList.value = data.games;
     uploadForm.definitions(gamesList.value.map((game) => game.name));
+    pageLoading.value = false;
   })
   .catch((err) => {
     console.log(err);
-  })
-  .finally(() => {
-    pageLoading.value = false;
+    uploadForm.definitions();
+    toast.error("Uploader is currently unavailable. Please try again later.");
   });
 
 const searchGames = () => {
