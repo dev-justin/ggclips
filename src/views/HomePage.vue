@@ -13,11 +13,11 @@
           <div v-for="clip in clips" class="w-[370px]">
             <VideoCard
               :title="clip.title"
-              :src="clip.url"
+              :playback="clip.playback_id"
               :game="clip.game"
               :username="clip.username"
               :avatar="clip.avatar"
-              :date="clip.date"
+              :date="convertDate(clip.date)"
               :id="clip.id"
             />
           </div>

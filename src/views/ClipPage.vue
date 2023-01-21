@@ -7,7 +7,7 @@
       <div class="flex flex-col lg:grid grid-cols-7 gap-8">
         <VideoPlayer
           class="col-span-4 xl:col-span-5 rounded-lg overflow-clip shadow-2xl shadow-purple-700/20"
-          :src="clip.url"
+          :playback="clip.playback_id"
         />
         <div
           class="col-span-3 xl:col-span-2 flex flex-col gap-4 border-2 p-6 sm:p-8 border-zinc-700 rounded-lg"
@@ -88,7 +88,6 @@ const { id } = route.params;
 getClip(id)
   .then((data) => {
     data ? (clip.value = data) : router.push("/");
-    console.log(clip.value);
   })
   .finally(() => {
     isOwner.value = user.uid === clip.value.uid;
