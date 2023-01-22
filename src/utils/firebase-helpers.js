@@ -219,7 +219,6 @@ const getRecentClips = async (max) => {
       };
     })
   );
-  console.log(clips);
   return clips;
 };
 

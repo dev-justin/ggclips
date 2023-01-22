@@ -1,7 +1,7 @@
 <template>
   <Form
     @submit="submit"
-    :validation-schema="uploadForm.schema"
+    :validation-schema="!pageLoading && uploadForm.schema"
     class="flex flex-col gap-4 text-purple-700"
   >
     <div class="grid sm:grid-cols-2 gap-2 sm:gap-3">
@@ -241,7 +241,6 @@ fetch("/api/games")
     pageLoading.value = false;
   })
   .catch((err) => {
-    console.log(err);
     uploadForm.definitions();
     toast.error("Uploader is currently unavailable. Please try again later.");
   });

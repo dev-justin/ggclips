@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col">
+  <div class="flex flex-col" v-if="!deleted">
     <div class="flex items-end justify-between pb-2">
       <div class="flex flex-col">
         <span class="text-sm text-gray-500">{{ convertDate(clip.date) }}</span>
@@ -14,10 +14,13 @@
         </router-link>
       </div>
       <div class="flex items-center gap-2">
-        <button v-if="currentUser === clip.username">
+        <button
+          v-if="currentUser === clip.username"
+          :disabled="deleteProcessing"
+        >
           <TrashIcon
             @click.prevent="handleDelete(clip.id)"
-            class="h-5 w-5 text-zinc-500 hover:text-red-500 transition-all duration-150 ease-out"
+            class="h-5 w-5 text-zinc-500 hover:text-red-500 transition-all duration-150 ease-out disabled:text-red-800/80"
           />
         </button>
 
@@ -96,15 +99,18 @@ const props = defineProps({
 // Setup toast notifications
 const toast = useToast();
 
-// State for like button processing
+// State for like & delete button processing
 const likeProcessing = ref(false);
+const deleteProcessing = ref(false);
+const deleted = ref(false);
 
 // Handle deleting a clip
 const handleDelete = async (id) => {
+  deleteProcessing.value = true;
   try {
     const authToken = await getToken();
     if (!authToken) throw new Error("No auth token");
-    const deleteAction = fetch(`/api/deleteClip`, {
+    const deleteAction = fetch("/api/deleteClip", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -114,10 +120,12 @@ const handleDelete = async (id) => {
     });
     // Wait for the delete action to complete
     const res = await deleteAction;
-    // Reload page and show toast notification
+    // If the delete action was successful, notify the user
     if (res.status === 200) {
-      toast.success("Clip deleted successfully!");
-      window.location.reload();
+      toast.success("Clip deleted successfully.");
+      deleted.value = true;
+    } else {
+      throw new Error("Something went wrong. Please try again.");
     }
   } catch (err) {
     switch (err.message) {
@@ -129,6 +137,7 @@ const handleDelete = async (id) => {
         break;
     }
   }
+  deleteProcessing.value = false;
 };
 
 // Post to /api/like with the clip id
