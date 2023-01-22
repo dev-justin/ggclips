@@ -4,7 +4,10 @@
     <!-- Slider with featured videos -->
     <div>
       <h1 class="text-3xl font-bold pb-6">Recent Clips</h1>
-      <Loaders v-if="loading" />
+      <div class="flex gap-8 flex-wrap" v-if="loading">
+        <VideoCardLoad v-for="n in 5" />
+      </div>
+
       <div v-else>
         <p class="text-xl font-bold text-zinc-500" v-if="clips.length === 0">
           No clips to show, please try again later.
@@ -28,9 +31,9 @@
 import Banner from "@/components/Banner.vue";
 import VideoCard from "@/components/VideoCard.vue";
 import { getRecentClips } from "@/utils/firebase-helpers";
-import Loaders from "@/components/common/Loaders.vue";
 import { ref } from "vue";
 import { useUserStore } from "@/stores/user";
+import VideoCardLoad from "../components/VideoCardLoad.vue";
 
 const userStore = useUserStore();
 const loading = ref(true);

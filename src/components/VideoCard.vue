@@ -20,13 +20,13 @@
         >
           <TrashIcon
             @click.prevent="handleDelete(clip.id)"
-            class="h-5 w-5 text-zinc-500 hover:text-red-500 transition-all duration-150 ease-out disabled:text-red-800/80"
+            class="h-5 w-5 text-zinc-500 hover:text-red-500 transition-all duration-150 ease-out disabled:text-red-800/80 disabled:animating-pulse"
           />
         </button>
 
         <button
           :disabled="likeProcessing"
-          class="flex items-center gap-1 cursor-pointer group disabled:text-zinc-700"
+          class="flex items-center gap-1 cursor-pointer group disabled:text-zinc-700 disabled:animate-pulse"
           :class="{
             'text-green-500': likesArray.includes(currentUser),
           }"

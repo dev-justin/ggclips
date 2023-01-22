@@ -14,7 +14,7 @@
     </div>
     <template v-else>
       <h3 v-if="!followingList">Follow people to see them appear below.</h3>
-      <h3 v-else-if="!followingClips.length">
+      <h3 v-else-if="!followingClips.length === 0">
         Once your following have uploaded a clip it will show here.
       </h3>
       <div v-else class="flex gap-8 flex-wrap">
