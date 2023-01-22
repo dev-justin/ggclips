@@ -21,14 +21,8 @@
         <VideoCard
           class="w-[360px]"
           v-for="clip in followingClips"
-          :key="clip.date.seconds"
-          :src="clip.url"
-          :game="clip.game"
-          :username="clip.username"
-          :id="clip.id"
-          :avatar="clip.avatar"
-          :date="convertDate(clip.date)"
-          :title="clip.title"
+          :key="clip.id"
+          :clip="clip"
         />
       </div>
     </template>
@@ -39,11 +33,7 @@
 import { ref } from "vue";
 import BasicTextBanner from "@/components/BasicTextBanner.vue";
 import { useUserStore } from "@/stores/user";
-import {
-  getUserDetails,
-  getFollowingClips,
-  convertDate,
-} from "@/utils/firebase-helpers";
+import { getUserDetails, getFollowingClips } from "@/utils/firebase-helpers";
 import VideoCard from "@/components/VideoCard.vue";
 import Loaders from "@/components/common/Loaders.vue";
 

@@ -46,6 +46,7 @@ const serviceAccount = {
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
+const db = admin.firestore();
 
 // Middleware to check if user is authenticated 🔐 (mux-webhook doesn't need this)
 app.use((req, res, next) => {
@@ -80,11 +81,21 @@ const { Video } = new Mux(
 );
 
 // Return the Mux auth URL (needed so client can upload file to Mux) 🗃️
-app.post("/api/getUploadAuth", (req, res) => {
+app.post("/api/getUploadAuth", async (req, res) => {
   const videoData = {
     title: req.body.title,
     game: req.body.game,
-    userId: req.user.name,
+    userId: await db
+      .collection("usernames")
+      .where("uid", "==", req.user.uid)
+      .get()
+      .then((querySnapshot) => {
+        let userId = "";
+        querySnapshot.forEach((doc) => {
+          userId = doc.id;
+        });
+        return userId;
+      }),
   };
   console.log(videoData);
 
@@ -118,21 +129,18 @@ app.post("/api/mux-webhook", async (req, res) => {
 
     try {
       // Grab user details from Firestore
-      const user = await admin
-        .firestore()
-        .collection("usernames")
-        .doc(userId)
-        .get();
+      const user = await db.collection("usernames").doc(userId).get();
       const { photoURL } = user.data();
 
       // Add clip to Firestore
-      await admin.firestore().collection("clips").add({
+      await db.collection("clips").add({
         avatar: photoURL,
         date: new Date(),
         game,
         title,
         username: userId,
         playback_id: playbackId,
+        likes: 0,
       });
     } catch {
       return res.status(500).json({ error: "Something went wrong" });
@@ -198,6 +206,79 @@ app.get("/api/games", async (req, res) => {
     } catch {
       res.status(500).json({ error: "Issue fetching games list" });
     }
+  }
+});
+
+// Handle liked clips 🤍
+app.post("/api/like", async (req, res) => {
+  const { clipId } = req.body;
+
+  // Find the user doc.id from /usernames/{username}/uid = req.user.uid
+  const userId = await db
+    .collection("usernames")
+    .where("uid", "==", req.user.uid)
+    .get()
+    .then((querySnapshot) => {
+      let userId = "";
+      querySnapshot.forEach((doc) => {
+        userId = doc.id;
+      });
+      return userId;
+    });
+
+  if (!clipId) return res.status(400).json({ error: "Missing clip ID." });
+  if (!userId) return res.status(400).json({ error: "Not authorized." });
+
+  try {
+    // Get clip from Firestore
+    const clip = await db.collection("clips").doc(clipId).get();
+    const { likes } = clip.data();
+
+    // Check if user has already liked clip
+    const liked = await db
+      .collection("clips")
+      .doc(clipId)
+      .collection("likes")
+      .doc(userId)
+      .get();
+
+    if (liked.exists) {
+      // Remove like from Firestore
+      await db
+        .collection("clips")
+        .doc(clipId)
+        .collection("likes")
+        .doc(userId)
+        .delete();
+      // Decrement likes count and return total likes
+      await db
+        .collection("clips")
+        .doc(clipId)
+        .update({ likes: likes - 1 })
+        .then(() => {
+          res.json({ liked: false, likes: likes - 1 });
+        });
+    } else {
+      // Add like to Firestore
+      await db
+        .collection("clips")
+        .doc(clipId)
+        .collection("likes")
+        .doc(userId)
+        .set({
+          date: new Date(),
+        });
+      // Increment likes count and return total likes
+      await db
+        .collection("clips")
+        .doc(clipId)
+        .update({ likes: likes + 1 })
+        .then(() => {
+          res.json({ liked: true, likes: likes + 1 });
+        });
+    }
+  } catch {
+    res.status(500).json({ error: "Something went wrong" });
   }
 });
 

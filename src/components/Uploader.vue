@@ -151,11 +151,11 @@
     <button
       type="submit"
       :disabled="uploadProgress.progress || pageLoading"
-      class="bg-purple-700 text-white px-4 py-4 rounded-md font-semibold hover:bg-purple-900 transition-all duration-150 ease-in-out disabled:cursor-not-allowed"
+      class="bg-purple-700 text-white px-4 py-4 rounded-md font-semibold transition-all duration-150 ease-in-out disabled:cursor-not-allowed"
       :class="[
         pageLoading
           ? 'bg-zinc-800 animate-pulse text-transparent'
-          : 'disabled:bg-gray-500 disabled:text-gray-400',
+          : 'disabled:bg-gray-500 disabled:text-gray-400 hover:bg-purple-900',
       ]"
     >
       Upload
@@ -214,10 +214,7 @@ import { uploadForm, configureVeeValidate } from "@/utils/validation";
 import { ref } from "vue";
 import * as UpChunk from "@mux/upchunk";
 import { getToken } from "@/utils/firebase-helpers";
-import Loaders from "@/components/common/Loaders.vue";
 import { useToast } from "vue-toastification";
-
-const emit = defineEmits(["clipAdded"]);
 
 // States
 const pageLoading = ref(true);
@@ -233,15 +230,14 @@ const uploadProgress = ref({
 // Setup toast notifications
 const toast = useToast();
 
-// Setup vee-validate
-configureVeeValidate();
-
 // Get list of games for search
 fetch("/api/games")
   .then((res) => res.json())
   .then((data) => {
     gamesList.value = data.games;
+    // Setup vee-validate
     uploadForm.definitions(gamesList.value.map((game) => game.name));
+    configureVeeValidate();
     pageLoading.value = false;
   })
   .catch((err) => {

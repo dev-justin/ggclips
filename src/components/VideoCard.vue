@@ -1,21 +1,33 @@
 <template>
   <div class="flex flex-col">
-    <div class="pb-2 flex flex-col">
-      <span class="text-sm text-gray-500">{{ date }}</span>
-      <router-link
-        :to="{ name: 'clip', params: { id } }"
-        class="text-purple-700 font-bold text-lg inline-flex items-center gap-2 group"
+    <div class="flex items-end justify-between pb-2">
+      <div class="flex flex-col">
+        <span class="text-sm text-gray-500">{{ convertDate(clip.date) }}</span>
+        <router-link
+          :to="{ name: 'clip', params: { id: clip.id } }"
+          class="text-purple-700 font-bold text-lg inline-flex items-center gap-2 group"
+        >
+          <span> {{ clip.title }}</span>
+          <EyeIcon
+            class="h-4 w-4 text-white group-hover:text-purple-400 group-hover:scale-110 transition-all duration-300 ease-in-out group-hover:animate-pulse"
+          />
+        </router-link>
+      </div>
+
+      <button
+        class="flex items-center gap-1 cursor-pointer group"
+        @click.prevent="handleLike(clip.id)"
       >
-        <span> {{ title }}</span>
-        <EyeIcon
-          class="h-4 w-4 text-white group-hover:text-purple-400 group-hover:scale-110 transition-all duration-300 ease-in-out group-hover:animate-pulse"
+        <span class="text-sm font-bold">{{ clip.likes }}</span>
+        <ArrowUpCircleIcon
+          class="h-5 w-5 mt-1 group-hover:text-purple-700 transition-all duration-150 ease-out"
         />
-      </router-link>
+      </button>
     </div>
 
     <VideoPlayer
       class="vjs-theme-forest cc-theme rounded-md overflow-clip"
-      :src="`https://stream.mux.com/${playback}.m3u8`"
+      :src="`https://stream.mux.com/${clip.playback_id}.m3u8`"
       fluid
       controls
       :playbackRates="[0.5, 1, 1.5]"
@@ -26,18 +38,18 @@
       <div
         class="bg-red-200 inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase text-red-900"
       >
-        <span>{{ game }}</span>
+        <span>{{ clip.game }}</span>
       </div>
-      <router-link :to="{ name: 'user', params: { id: username } }">
+      <router-link :to="{ name: 'user', params: { id: clip.username } }">
         <div class="flex items-center gap-2 group">
           <img
             class="inline-block h-6 w-6 rounded-full ring-2 ring-white group-hover:ring-purple-700 transition-all duration-150 ease-in-out"
-            :src="avatar"
-            :alt="username"
+            :src="clip.avatar"
+            :alt="clip.username"
           />
           <span
             class="text-white group-hover:text-purple-700 transition-all duration-150 ease-in-out"
-            >{{ username }}</span
+            >{{ clip.username }}</span
           >
         </div>
       </router-link>
@@ -46,39 +58,42 @@
 </template>
 
 <script setup>
-import { EyeIcon } from "@heroicons/vue/20/solid";
+import { convertDate, getToken } from "@/utils/firebase-helpers";
+import { EyeIcon, ArrowUpCircleIcon } from "@heroicons/vue/20/solid";
+import { useToast } from "vue-toastification";
 import { VideoPlayer } from "@videojs-player/vue";
 import "video.js/dist/video-js.css";
 import "@videojs/themes/dist/forest/index.css";
 
 const props = defineProps({
-  playback: {
-    type: String,
-    required: true,
-  },
-  game: {
-    type: String,
-    required: true,
-  },
-  username: {
-    type: String,
-    required: true,
-  },
-  avatar: {
-    type: String,
-    required: true,
-  },
-  date: {
-    type: String,
-    required: true,
-  },
-  title: {
-    type: String,
-    required: true,
-  },
-  id: {
-    type: String,
+  clip: {
+    type: Object,
     required: true,
   },
 });
+
+// Setup toast notifications
+const toast = useToast();
+
+// Post to /api/like with the clip id
+const handleLike = async (id) => {
+  try {
+    const authToken = await getToken();
+    if (!authToken) throw new Error("No auth token");
+    const likeAction = fetch("http://127.0.0.1:3005/api/like", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ clipId: id }),
+    });
+    const res = await likeAction;
+    const data = await res.json();
+    // Update clips.likes from data.likes
+    props.clip.likes = data.likes;
+  } catch {
+    toast.error("You must be logged in to like a clip");
+  }
+};
 </script>
