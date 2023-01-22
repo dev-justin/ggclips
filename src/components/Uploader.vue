@@ -1,7 +1,7 @@
 <template>
   <Form
     @submit="submit"
-    :validation-schema="uploadValidation"
+    :validation-schema="uploadValidation || {}"
     class="flex flex-col gap-4 text-purple-700"
   >
     <div class="grid sm:grid-cols-2 gap-2 sm:gap-3">
@@ -232,14 +232,14 @@ const uploadValidation = ref(null);
 const toast = useToast();
 
 // Get list of games for search
-fetch("/api/games")
+fetch("http://127.0.0.1:3005/api/games")
   .then((res) => res.json())
   .then((data) => {
     gamesList.value = data.games;
     // Setup vee-validate
     uploadForm.definitions(gamesList.value.map((game) => game.name));
-    uploadValidation.value = uploadForm.schema;
     configureVeeValidate();
+    uploadValidation.value = uploadForm.schema;
     pageLoading.value = false;
   })
   .catch((err) => {
