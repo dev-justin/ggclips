@@ -7,8 +7,12 @@
         <h1 class="text-3xl font-bold pb-6">Top Clips</h1>
         <TrophyIcon class="h-6 w-6 -mt-5 text-amber-500" />
       </div>
-      <div class="flex gap-8 flex-wrap" v-if="loading">
-        <VideoCardLoad v-for="n in 5" class="flex-grow w-[370px] max-w-1/2" />
+      <div
+        class="flex gap-12 min-h-[210px] items-center flex-col justify-center sm:flex-row sm:justify-start pl-12"
+        v-if="loading"
+      >
+        <Loaders />
+        <span class="text-zinc-500 animate-pulse">Doing some magic...</span>
       </div>
 
       <div v-else>
@@ -39,8 +43,12 @@
         <h1 class="text-3xl font-bold pb-6">Recent Clips</h1>
         <SparklesIcon class="h-6 w-6 -mt-5 text-cyan-300" />
       </div>
-      <div class="flex gap-8 flex-wrap" v-if="loading">
-        <VideoCardLoad v-for="n in 10" class="flex-grow w-[370px] max-w-1/2" />
+      <div
+        class="flex gap-12 min-h-[210px] items-center flex-col justify-center sm:flex-row sm:justify-start pl-12"
+        v-if="loading"
+      >
+        <Loaders />
+        <span class="text-zinc-500 animate-pulse">Doing some magic...</span>
       </div>
 
       <div v-else>
@@ -79,6 +87,7 @@ import { useUserStore } from "@/stores/user";
 import VideoCardLoad from "../components/VideoCardLoad.vue";
 import { TrophyIcon, SparklesIcon } from "@heroicons/vue/20/solid";
 import { useToast } from "vue-toastification";
+import Loaders from "@/components/common/Loaders.vue";
 
 const toast = useToast();
 
