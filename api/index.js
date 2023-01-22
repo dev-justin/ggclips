@@ -168,7 +168,7 @@ app.post("/api/mux-webhook", async (req, res) => {
 // Get games list from Twitch API 🕹️
 app.get("/api/games", async (req, res) => {
   // Check if games list is cached
-  const cachedGames = await redis.get("games");
+  // const cachedGames = await redis.get("games");
 
   if (cachedGames) {
     return res.json({ source: "cache", games: JSON.parse(cachedGames) });
