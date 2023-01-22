@@ -2,7 +2,7 @@
   <Banner />
   <main class="flex flex-col gap-12">
     <!-- Top Clips -->
-    <div class="border-b-2 border-zinc-700 pb-12">
+    <div class="border-b-2 border-zinc-700 sm:pb-12">
       <div class="flex items-center gap-4">
         <h1 class="text-3xl font-bold pb-6">Top Clips</h1>
         <TrophyIcon class="h-6 w-6 -mt-5 text-amber-500" />

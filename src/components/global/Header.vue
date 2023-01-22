@@ -38,7 +38,16 @@
             </div>
           </div>
         </div>
-        <div class="flex flex-1 justify-center px-2 lg:ml-6 lg:justify-end">
+        <div
+          class="flex flex-1 justify-center px-2 lg:ml-6 lg:justify-end gap-4"
+        >
+          <div
+            v-if="totalUsers"
+            class="items-center justify-center gap-1 text-zinc-600 hidden md:flex"
+          >
+            <RocketLaunchIcon class="h-5 w-5 text-purple-700/80" />
+            <span>{{ totalUsers }} Users</span>
+          </div>
           <div class="w-full max-w-lg lg:max-w-xs relative">
             <label for="search" class="sr-only">Search</label>
             <div class="relative">
@@ -255,7 +264,7 @@ import {
   MenuItem,
   MenuItems,
 } from "@headlessui/vue";
-import { MagnifyingGlassIcon } from "@heroicons/vue/20/solid";
+import { MagnifyingGlassIcon, RocketLaunchIcon } from "@heroicons/vue/20/solid";
 import { Bars3Icon, XMarkIcon } from "@heroicons/vue/24/outline";
 import { ref } from "vue";
 import LogoSvg from "@/components/icons/LogoSvg.vue";
@@ -263,7 +272,7 @@ import DotLoader from "@/components/icons/DotLoader.vue";
 import { useModalStore } from "@/stores/modal";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
-import { getAllUsersAndClips } from "@/utils/firebase-helpers";
+import { getAllUsersAndClips, getUsersCount } from "@/utils/firebase-helpers";
 
 const userStore = useUserStore();
 const { userLoggedIn } = storeToRefs(userStore);
@@ -279,6 +288,7 @@ const searchTerm = ref("");
 const searchDBQuery = ref({});
 const searchResults = ref({});
 const searchLoading = ref(false);
+const totalUsers = ref(0);
 
 const search = async () => {
   searchLoading.value = true;
@@ -330,4 +340,8 @@ const filterResults = () => {
     };
   }
 };
+
+getUsersCount().then((count) => {
+  totalUsers.value = count;
+});
 </script>
