@@ -1,7 +1,7 @@
 <template>
   <Form
     @submit="submit"
-    :validation-schema="uploadScehema?.schema"
+    :validation-schema="uploadValidation?.schema"
     class="flex flex-col gap-4 text-purple-700"
   >
     <div class="grid sm:grid-cols-2 gap-2 sm:gap-3">
@@ -226,7 +226,7 @@ const uploadProgress = ref({
   progress: 0,
   errorMessage: "",
 });
-const uploadScehema = ref(null);
+const uploadValidation = ref(null);
 
 // Setup toast notifications
 const toast = useToast();
@@ -237,9 +237,8 @@ fetch("/api/games")
   .then((data) => {
     gamesList.value = data.games;
     // Setup vee-validate
-    uploadScehema.value = uploadForm.definitions(
-      gamesList.value.map((game) => game.name)
-    );
+    uploadForm.definitions(gamesList.value.map((game) => game.name));
+    uploadValidation.value = uploadForm.schema;
     configureVeeValidate();
     pageLoading.value = false;
   })
