@@ -47,15 +47,7 @@
         </p>
         <div class="flex gap-8 flex-wrap">
           <div v-for="clip in clips" class="w-[370px]">
-            <VideoCard
-              :title="clip.title"
-              :playback="clip.playback_id"
-              :game="clip.game"
-              :username="clip.username"
-              :avatar="clip.avatar"
-              :date="convertDate(clip.date)"
-              :id="clip.id"
-            />
+            <VideoCard :key="clip.id" :clip="clip" />
           </div>
         </div>
       </div>
