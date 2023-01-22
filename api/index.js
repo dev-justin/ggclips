@@ -203,6 +203,19 @@ app.get("/api/games", async (req, res) => {
           Authorization: `Bearer ${access_token}`,
         },
       });
+
+      // Add additional games to the list
+      const addGames = await axios({
+        method: "get",
+        url: "https://api.twitch.tv/helix/games?name=Fallout 3&name=Ghostrunner",
+        headers: {
+          "Client-Id": process.env.TWITCH_CLIENT_ID,
+          Authorization: `Bearer ${access_token}`,
+        },
+      });
+
+      games.data.data.push(...addGames.data.data);
+
       // Throw error if no games returned
       if (!games.data.data)
         return res.status(500).json({ error: "Issue fetching games list" });
