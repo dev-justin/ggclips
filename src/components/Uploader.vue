@@ -232,7 +232,7 @@ const uploadValidation = ref(null);
 const toast = useToast();
 
 // Get list of games for search
-fetch("http://127.0.0.1:3005/api/games")
+fetch("/api/games")
   .then((res) => res.json())
   .then((data) => {
     gamesList.value = data.games;
