@@ -168,73 +168,73 @@ app.post("/api/mux-webhook", async (req, res) => {
 // Get games list from Twitch API 🕹️
 app.get("/api/games", async (req, res) => {
   // Check if games list is cached
-  // const cachedGames = await redis.get("games");
+  const cachedGames = await redis.get("games");
 
-  if (cachedGames) {
-    return res.json({ source: "cache", games: JSON.parse(cachedGames) });
-  } else {
-    try {
-      // Get access token from Twitch API
-      const twitchAuth = await axios({
-        method: "post",
-        url: "https://id.twitch.tv/oauth2/token",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        data: qs.stringify({
-          client_id: process.env.TWITCH_CLIENT_ID,
-          client_secret: process.env.TWITCH_CLIENT_SECRET,
-          grant_type: "client_credentials",
-        }),
-      });
-      // Throw error if no access token
-      if (!twitchAuth.data.access_token)
-        return res
-          .status(500)
-          .json({ error: "Can't fetch access token for Twitch API" });
+  // if (cachedGames) {
+  //   return res.json({ source: "cache", games: JSON.parse(cachedGames) });
+  // } else {
+  try {
+    // Get access token from Twitch API
+    const twitchAuth = await axios({
+      method: "post",
+      url: "https://id.twitch.tv/oauth2/token",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      data: qs.stringify({
+        client_id: process.env.TWITCH_CLIENT_ID,
+        client_secret: process.env.TWITCH_CLIENT_SECRET,
+        grant_type: "client_credentials",
+      }),
+    });
+    // Throw error if no access token
+    if (!twitchAuth.data.access_token)
+      return res
+        .status(500)
+        .json({ error: "Can't fetch access token for Twitch API" });
 
-      const { access_token } = twitchAuth.data;
-      // Get games list from Twitch API
-      const games = await axios({
-        method: "get",
-        url: "https://api.twitch.tv/helix/games/top?first=100",
-        headers: {
-          "Client-Id": process.env.TWITCH_CLIENT_ID,
-          Authorization: `Bearer ${access_token}`,
-        },
-      });
+    const { access_token } = twitchAuth.data;
+    // Get games list from Twitch API
+    const games = await axios({
+      method: "get",
+      url: "https://api.twitch.tv/helix/games/top?first=100",
+      headers: {
+        "Client-Id": process.env.TWITCH_CLIENT_ID,
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
 
-      // Add additional games to the list
-      const addGames = await axios({
-        method: "get",
-        url: "https://api.twitch.tv/helix/games?name=Fallout 3&name=Ghostrunner",
-        headers: {
-          "Client-Id": process.env.TWITCH_CLIENT_ID,
-          Authorization: `Bearer ${access_token}`,
-        },
-      });
+    // Add additional games to the list
+    const addGames = await axios({
+      method: "get",
+      url: "https://api.twitch.tv/helix/games?name=Fallout 3&name=Ghostrunner",
+      headers: {
+        "Client-Id": process.env.TWITCH_CLIENT_ID,
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
 
-      games.data.data.push(...addGames.data.data);
+    games.data.data.push(...addGames.data.data);
 
-      // Throw error if no games returned
-      if (!games.data.data)
-        return res.status(500).json({ error: "Issue fetching games list" });
+    // Throw error if no games returned
+    if (!games.data.data)
+      return res.status(500).json({ error: "Issue fetching games list" });
 
-      // Return only the name and box art
-      const gamesList = games.data.data.map((game) => ({
-        name: game.name,
-        box_art_url: game.box_art_url
-          .replace("{width}", "285")
-          .replace("{height}", "380"),
-      }));
+    // Return only the name and box art
+    const gamesList = games.data.data.map((game) => ({
+      name: game.name,
+      box_art_url: game.box_art_url
+        .replace("{width}", "285")
+        .replace("{height}", "380"),
+    }));
 
-      // Set games list in cache for 24 hours
-      redis.set("games", JSON.stringify(gamesList), "EX", 86400);
-      res.json({ state: "origin", games: gamesList });
-    } catch {
-      res.status(500).json({ error: "Issue fetching games list" });
-    }
+    // Set games list in cache for 24 hours
+    redis.set("games", JSON.stringify(gamesList), "EX", 86400);
+    res.json({ state: "origin", games: gamesList });
+  } catch {
+    res.status(500).json({ error: "Issue fetching games list" });
   }
+  // }
 });
 
 // Handle liked clips 🤍
