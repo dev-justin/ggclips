@@ -5,7 +5,7 @@
     <div>
       <h1 class="text-3xl font-bold pb-6">Recent Clips</h1>
       <div class="flex gap-8 flex-wrap" v-if="loading">
-        <VideoCardLoad v-for="n in 5" />
+        <VideoCardLoad v-for="n in 4" />
       </div>
 
       <div v-else>
