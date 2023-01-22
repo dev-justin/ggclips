@@ -298,6 +298,41 @@ app.post("/api/like", async (req, res) => {
   }
 });
 
+app.post("/api/deleteClip", async (req, res) => {
+  const { clipId } = req.body;
+  if (!clipId) return res.status(400).json({ error: "Missing clip ID." });
+
+  // Find the user doc.id from /usernames/{username}/uid = req.user.uid
+  const userId = await db
+    .collection("usernames")
+    .where("uid", "==", req.user.uid)
+    .get()
+    .then((querySnapshot) => {
+      let userId = "";
+      querySnapshot.forEach((doc) => {
+        userId = doc.id;
+      });
+      return userId;
+    });
+
+  if (!userId) return res.status(400).json({ error: "Not authorized." });
+
+  try {
+    // Get clip from Firestore
+    const clip = await db.collection("clips").doc(clipId).get();
+    const { username } = clip.data();
+
+    if (username !== userId)
+      return res.status(400).json({ error: "Not authorized." });
+
+    // Delete clip from Firestore
+    await db.collection("clips").doc(clipId).delete();
+    res.json({ success: true });
+  } catch {
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
 // Close Redis connection on exit
 process.on("SIGINT", () => {
   console.log("Closing Redis client connection...");

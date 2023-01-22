@@ -13,20 +13,28 @@
           />
         </router-link>
       </div>
+      <div class="flex items-center gap-2">
+        <button v-if="currentUser === clip.username">
+          <TrashIcon
+            @click.prevent="handleDelete(clip.id)"
+            class="h-5 w-5 text-zinc-500 hover:text-red-500 transition-all duration-150 ease-out"
+          />
+        </button>
 
-      <button
-        :disabled="likeProcessing"
-        class="flex items-center gap-1 cursor-pointer group disabled:text-zinc-700"
-        :class="{
-          'text-green-500': likesArray.includes(currentUser),
-        }"
-        @click.prevent="handleLike(clip.id)"
-      >
-        <span class="text-sm font-bold">{{ clip.likes }}</span>
-        <ArrowUpCircleIcon
-          class="h-5 w-5 mt-1 group-hover:text-purple-700 transition-all duration-150 ease-out"
-        />
-      </button>
+        <button
+          :disabled="likeProcessing"
+          class="flex items-center gap-1 cursor-pointer group disabled:text-zinc-700"
+          :class="{
+            'text-green-500': likesArray.includes(currentUser),
+          }"
+          @click.prevent="handleLike(clip.id)"
+        >
+          <span class="text-sm font-bold">{{ clip.likes }}</span>
+          <ArrowUpCircleIcon
+            class="h-5 w-5 mt-1 group-hover:text-purple-700 transition-all duration-150 ease-out"
+          />
+        </button>
+      </div>
     </div>
 
     <VideoPlayer
@@ -63,7 +71,7 @@
 
 <script setup>
 import { convertDate, getToken } from "@/utils/firebase-helpers";
-import { EyeIcon, ArrowUpCircleIcon } from "@heroicons/vue/20/solid";
+import { EyeIcon, ArrowUpCircleIcon, TrashIcon } from "@heroicons/vue/20/solid";
 import { useToast } from "vue-toastification";
 import { VideoPlayer } from "@videojs-player/vue";
 import { ref } from "vue";
@@ -90,6 +98,38 @@ const toast = useToast();
 
 // State for like button processing
 const likeProcessing = ref(false);
+
+// Handle deleting a clip
+const handleDelete = async (id) => {
+  try {
+    const authToken = await getToken();
+    if (!authToken) throw new Error("No auth token");
+    const deleteAction = fetch(`/api/deleteClip`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ clipId: id }),
+    });
+    // Wait for the delete action to complete
+    const res = await deleteAction;
+    // Reload page and show toast notification
+    if (res.status === 200) {
+      toast.success("Clip deleted successfully!");
+      window.location.reload();
+    }
+  } catch (err) {
+    switch (err.message) {
+      case "No auth token":
+        toast.error("You must be logged in to delete a clip.");
+        break;
+      default:
+        toast.error("Something went wrong. Please try again.");
+        break;
+    }
+  }
+};
 
 // Post to /api/like with the clip id
 const handleLike = async (id) => {
