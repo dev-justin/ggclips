@@ -43,6 +43,7 @@
     <VideoPlayer
       class="vjs-theme-forest cc-theme rounded-md overflow-clip"
       :src="`https://stream.mux.com/${clip.playback_id}.m3u8`"
+      :poster="`https://image.mux.com/${clip.playback_id}/thumbnail.webp?width=740&height=410`"
       fluid
       controls
       :playbackRates="[0.5, 1, 1.5]"
