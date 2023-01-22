@@ -21,8 +21,10 @@
         <VideoCard
           class="w-[360px]"
           v-for="clip in followingClips"
-          :key="clip.id"
-          :clip="clip"
+          :key="clip.video.id"
+          :clip="clip.video"
+          :likesArray="clip.likesArray"
+          :currentUser="userStore.username"
         />
       </div>
     </template>
@@ -46,10 +48,8 @@ getUserDetails(userStore.username)
   .then((user) => {
     followingList.value = user.following.length || false;
     if (followingList.value) {
-      getFollowingClips(user.following).then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-          followingClips.value.push({ id: doc.id, ...doc.data() });
-        });
+      getFollowingClips(user.following).then((data) => {
+        followingClips.value = data;
       });
     }
   })

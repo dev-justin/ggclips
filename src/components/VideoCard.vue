@@ -15,7 +15,11 @@
       </div>
 
       <button
-        class="flex items-center gap-1 cursor-pointer group"
+        :disabled="likeProcessing"
+        class="flex items-center gap-1 cursor-pointer group disabled:text-zinc-700"
+        :class="{
+          'text-green-500': likesArray.includes(currentUser),
+        }"
         @click.prevent="handleLike(clip.id)"
       >
         <span class="text-sm font-bold">{{ clip.likes }}</span>
@@ -62,6 +66,7 @@ import { convertDate, getToken } from "@/utils/firebase-helpers";
 import { EyeIcon, ArrowUpCircleIcon } from "@heroicons/vue/20/solid";
 import { useToast } from "vue-toastification";
 import { VideoPlayer } from "@videojs-player/vue";
+import { ref } from "vue";
 import "video.js/dist/video-js.css";
 import "@videojs/themes/dist/forest/index.css";
 
@@ -70,17 +75,29 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  likesArray: {
+    type: Array,
+    required: true,
+  },
+  currentUser: {
+    type: String,
+    required: true,
+  },
 });
 
 // Setup toast notifications
 const toast = useToast();
 
+// State for like button processing
+const likeProcessing = ref(false);
+
 // Post to /api/like with the clip id
 const handleLike = async (id) => {
+  likeProcessing.value = true;
   try {
     const authToken = await getToken();
     if (!authToken) throw new Error("No auth token");
-    const likeAction = fetch("/api/like", {
+    const likeAction = fetch("http://127.0.0.1:3005/api/like", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -89,11 +106,29 @@ const handleLike = async (id) => {
       body: JSON.stringify({ clipId: id }),
     });
     const res = await likeAction;
+    if (res.status === 429)
+      throw new Error("Oops, too many requests! You have been rate limited.");
     const data = await res.json();
     // Update clips.likes from data.likes
     props.clip.likes = data.likes;
-  } catch {
-    toast.error("You must be logged in to like a clip");
+    data.liked
+      ? props.likesArray.push(props.currentUser)
+      : props.likesArray.splice(props.likesArray.indexOf(props.currentUser), 1);
+  } catch (err) {
+    switch (err.message) {
+      case "No auth token":
+        toast.error("You must be logged in to like a clip");
+        break;
+      case "Oops, too many requests! You have been rate limited.":
+        toast.error(err.message);
+        break;
+      default:
+        toast.error("Something went wrong");
+    }
   }
+  // Add an extra second to prevent double clicking
+  setTimeout(() => {
+    likeProcessing.value = false;
+  }, 1000);
 };
 </script>

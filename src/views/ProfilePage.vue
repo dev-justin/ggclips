@@ -23,8 +23,10 @@
           <VideoCard
             class="w-[370px]"
             v-for="clip in clips"
-            :key="clip.id"
-            :clip="clip"
+            :key="clip.video.id"
+            :clip="clip.video"
+            :likesArray="clip.likesArray"
+            :currentUser="user.username"
           />
         </div>
       </div>
@@ -47,10 +49,8 @@ const clips = ref([]);
 const user = useUserStore();
 
 getClipsByUsername(user.username)
-  .then((querySnapshot) => {
-    querySnapshot.forEach((doc) => {
-      clips.value.push({ id: doc.id, ...doc.data() });
-    });
+  .then((data) => {
+    clips.value = data;
   })
   .finally(() => {
     loading.value = false;

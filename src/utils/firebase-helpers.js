@@ -155,7 +155,20 @@ const getClipsByUsername = async (username) => {
     orderBy("date", "desc")
   );
   const querySnapshot = await getDocs(q);
-  return querySnapshot;
+  // Get the likes subcollection for each clip
+  const clips = await Promise.all(
+    querySnapshot.docs.map(async (doc) => {
+      const likes = await getLikes(doc.id);
+      return {
+        video: {
+          id: doc.id,
+          ...doc.data(),
+        },
+        likesArray: likes,
+      };
+    })
+  );
+  return clips;
 };
 
 // Get all clips where the username is in the following array
@@ -166,14 +179,48 @@ const getFollowingClips = async (following) => {
     orderBy("date", "desc")
   );
   const querySnapshot = await getDocs(q);
-  return querySnapshot;
+  // Get the likes subcollection for each clip
+  const clips = await Promise.all(
+    querySnapshot.docs.map(async (doc) => {
+      const likes = await getLikes(doc.id);
+      return {
+        video: {
+          id: doc.id,
+          ...doc.data(),
+        },
+        likesArray: likes,
+      };
+    })
+  );
+  return clips;
 };
 
-// Get the 5 most recent clips
+// Get the likes collection for a specific clip
+const getLikes = async (id) => {
+  const q = query(collection(db, "clips", id, "likes"));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map((doc) => doc.id);
+};
+
+// Get the 5 most recent clips and their likes subcollection
 const getRecentClips = async (max) => {
   const q = query(collection(db, "clips"), orderBy("date", "desc"), limit(max));
   const querySnapshot = await getDocs(q);
-  return querySnapshot;
+  // Get the likes subcollection for each clip
+  const clips = await Promise.all(
+    querySnapshot.docs.map(async (doc) => {
+      const likes = await getLikes(doc.id);
+      return {
+        video: {
+          id: doc.id,
+          ...doc.data(),
+        },
+        likesArray: likes,
+      };
+    })
+  );
+  console.log(clips);
+  return clips;
 };
 
 // Follow another user

@@ -275,6 +275,11 @@ const submit = async (values, { resetForm }) => {
         game: values.Game,
       }),
     });
+    if (data.status == 429)
+      throw Error(
+        "You have reached the maximum number of uploads for today. Please try again tomorrow."
+      );
+
     const { url } = await data.json();
 
     const upload = UpChunk.createUpload({
@@ -306,9 +311,17 @@ const submit = async (values, { resetForm }) => {
     uploadProgress.value.progress = 0;
     files.value = null;
     resetForm();
-    toast.error(
-      "We are having issues processing your request. Please try again later."
-    );
+
+    switch (error.message) {
+      case "You have reached the maximum number of uploads for today. Please try again tomorrow.":
+        toast.error(error.message);
+        return;
+      default:
+        toast.error(
+          "Uploader is currently unavailable. Please try again later."
+        );
+        return;
+    }
   }
 };
 </script>

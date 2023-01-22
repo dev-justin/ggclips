@@ -47,7 +47,12 @@
         </p>
         <div class="flex gap-8 flex-wrap">
           <div v-for="clip in clips" class="w-[370px]">
-            <VideoCard :key="clip.id" :clip="clip" />
+            <VideoCard
+              :key="clip.video.id"
+              :clip="clip.video"
+              :likesArray="clip.likesArray"
+              :currentUser="user.username"
+            />
           </div>
         </div>
       </div>
@@ -61,7 +66,6 @@ import VideoCard from "@/components/VideoCard.vue";
 import Loaders from "@/components/common/Loaders.vue";
 import { useRoute, useRouter } from "vue-router";
 import {
-  convertDate,
   getClipsByUsername,
   getAuthAndReqUser,
   getUserDetails,
@@ -114,10 +118,8 @@ if (id.toLowerCase() === user.username.toLowerCase() || !user.userLoggedIn) {
 // Retrieve clips by username
 const getClips = (username) => {
   getClipsByUsername(username)
-    .then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        clips.value.push({ id: doc.id, ...doc.data() });
-      });
+    .then((data) => {
+      clips.value = data;
     })
     .finally(() => {
       loading.value = false;

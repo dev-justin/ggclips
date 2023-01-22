@@ -8,6 +8,7 @@ const admin = require("firebase-admin");
 const axios = require("axios");
 const qs = require("qs");
 const Redis = require("ioredis");
+const rateLimit = require("express-rate-limit");
 
 // Init Express & dotenv
 const app = express();
@@ -19,6 +20,20 @@ app.use(
     origin: ["http://127.0.0.1:5173", "https://ggclips.io"],
   })
 );
+
+// Init Rate Limit 🦥 (like && getUploadAuth endpoint)
+const likeLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 20, // 20 requests per hour
+  message: "Too many requests from this IP, please try again after an hour",
+});
+const uploadLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 5, // 5 requests per day
+  message: "Too many requests from this IP, please try again after a day",
+});
+app.use("/api/like", likeLimiter);
+app.use("/api/getUploadAuth", uploadLimiter);
 
 // Init Body Parser
 app.use(bodyParser.json());
@@ -267,6 +282,7 @@ app.post("/api/like", async (req, res) => {
         .doc(userId)
         .set({
           date: new Date(),
+          uid: req.user.uid,
         });
       // Increment likes count and return total likes
       await db

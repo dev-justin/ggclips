@@ -13,8 +13,10 @@
           <VideoCard
             v-for="clip in clips"
             class="w-[370px]"
-            :key="clip.id"
-            :clip="clip"
+            :key="clip.video.id"
+            :clip="clip.video"
+            :likesArray="clip.likesArray"
+            :currentUser="userStore.username"
           />
         </div>
       </div>
@@ -25,18 +27,18 @@
 <script setup>
 import Banner from "@/components/Banner.vue";
 import VideoCard from "@/components/VideoCard.vue";
-import { getRecentClips, convertDate } from "@/utils/firebase-helpers";
+import { getRecentClips } from "@/utils/firebase-helpers";
 import Loaders from "@/components/common/Loaders.vue";
 import { ref } from "vue";
+import { useUserStore } from "@/stores/user";
 
+const userStore = useUserStore();
 const loading = ref(true);
 const clips = ref([]);
 
 getRecentClips()
-  .then((querySnapshot) => {
-    querySnapshot.forEach((doc) => {
-      clips.value.push({ id: doc.id, ...doc.data() });
-    });
+  .then((data) => {
+    clips.value = data;
   })
   .catch((error) => {
     console.log("Error getting documents: ", error);
