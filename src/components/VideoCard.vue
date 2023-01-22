@@ -97,7 +97,7 @@ const handleLike = async (id) => {
   try {
     const authToken = await getToken();
     if (!authToken) throw new Error("No auth token");
-    const likeAction = fetch("http://127.0.0.1:3005/api/like", {
+    const likeAction = fetch("/api/like", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${authToken}`,
