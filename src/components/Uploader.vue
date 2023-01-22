@@ -1,7 +1,7 @@
 <template>
   <Form
     @submit="submit"
-    :validation-schema="!pageLoading && uploadForm.schema"
+    :validation-schema="uploadForm.schema"
     class="flex flex-col gap-4 text-purple-700"
   >
     <div class="grid sm:grid-cols-2 gap-2 sm:gap-3">
