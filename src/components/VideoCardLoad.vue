@@ -14,7 +14,7 @@
       </div>
     </div>
 
-    <div class="h-[210px] w-[370px] bg-zinc-800 rounded-md animate-pulse"></div>
+    <div class="h-[210px] w-full bg-zinc-800 rounded-md animate-pulse"></div>
 
     <div class="flex items-center justify-between pt-4">
       <div

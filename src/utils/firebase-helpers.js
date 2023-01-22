@@ -202,9 +202,33 @@ const getLikes = async (id) => {
   return querySnapshot.docs.map((doc) => doc.id);
 };
 
-// Get the 5 most recent clips and their likes subcollection
+// Get the X most recent clips and their likes subcollection
 const getRecentClips = async (max) => {
   const q = query(collection(db, "clips"), orderBy("date", "desc"), limit(max));
+  const querySnapshot = await getDocs(q);
+  // Get the likes subcollection for each clip
+  const clips = await Promise.all(
+    querySnapshot.docs.map(async (doc) => {
+      const likes = await getLikes(doc.id);
+      return {
+        video: {
+          id: doc.id,
+          ...doc.data(),
+        },
+        likesArray: likes,
+      };
+    })
+  );
+  return clips;
+};
+
+// Get the X most top clips based on likes and their likes subcollection
+const getTopClips = async (max) => {
+  const q = query(
+    collection(db, "clips"),
+    orderBy("likes", "desc"),
+    limit(max)
+  );
   const querySnapshot = await getDocs(q);
   // Get the likes subcollection for each clip
   const clips = await Promise.all(
@@ -285,6 +309,7 @@ export {
   getClipsByUsername,
   getUserDetails,
   getRecentClips,
+  getTopClips,
   followUser,
   unfollowUser,
   getAuthAndReqUser,
