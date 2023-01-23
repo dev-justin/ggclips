@@ -338,8 +338,9 @@ app.post("/api/deleteClip", async (req, res) => {
     if (username !== userId)
       return res.status(400).json({ error: "Not authorized." });
 
-    // Delete clip from Firestore
+    // Delete clip and any subcollections from Firestore
     await db.collection("clips").doc(clipId).delete();
+
     res.json({ success: true });
   } catch {
     res.status(500).json({ error: "Something went wrong" });

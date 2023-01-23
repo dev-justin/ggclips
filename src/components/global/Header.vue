@@ -42,11 +42,17 @@
           class="flex flex-1 justify-center px-2 lg:ml-6 lg:justify-end gap-4"
         >
           <div
-            v-if="totalUsers"
-            class="items-center justify-center gap-1 text-zinc-600 hidden md:flex"
+            class="justify-center gap-4 hidden lg:flex"
+            v-if="totalUsers && totalClips"
           >
-            <RocketLaunchIcon class="h-5 w-5 text-purple-700/80" />
-            <span>{{ totalUsers }} Users</span>
+            <div class="items-center justify-center gap-1 text-zinc-600 flex">
+              <RocketLaunchIcon class="h-5 w-5 text-purple-700/80" />
+              <span>{{ totalUsers }} Users</span>
+            </div>
+            <div class="items-center justify-center gap-1 text-zinc-600 flex">
+              <FilmIcon class="h-5 w-5 text-purple-700/80" />
+              <span>{{ totalClips }} Clips</span>
+            </div>
           </div>
           <div class="w-full max-w-lg lg:max-w-xs relative">
             <label for="search" class="sr-only">Search</label>
@@ -264,7 +270,11 @@ import {
   MenuItem,
   MenuItems,
 } from "@headlessui/vue";
-import { MagnifyingGlassIcon, RocketLaunchIcon } from "@heroicons/vue/20/solid";
+import {
+  MagnifyingGlassIcon,
+  RocketLaunchIcon,
+  FilmIcon,
+} from "@heroicons/vue/20/solid";
 import { Bars3Icon, XMarkIcon } from "@heroicons/vue/24/outline";
 import { ref } from "vue";
 import LogoSvg from "@/components/icons/LogoSvg.vue";
@@ -272,7 +282,11 @@ import DotLoader from "@/components/icons/DotLoader.vue";
 import { useModalStore } from "@/stores/modal";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
-import { getAllUsersAndClips, getUsersCount } from "@/utils/firebase-helpers";
+import {
+  getAllUsersAndClips,
+  getUsersCount,
+  getClipsCount,
+} from "@/utils/firebase-helpers";
 
 const userStore = useUserStore();
 const { userLoggedIn } = storeToRefs(userStore);
@@ -289,6 +303,7 @@ const searchDBQuery = ref({});
 const searchResults = ref({});
 const searchLoading = ref(false);
 const totalUsers = ref(0);
+const totalClips = ref(0);
 
 const search = async () => {
   searchLoading.value = true;
@@ -343,5 +358,9 @@ const filterResults = () => {
 
 getUsersCount().then((count) => {
   totalUsers.value = count;
+});
+
+getClipsCount().then((count) => {
+  totalClips.value = count;
 });
 </script>

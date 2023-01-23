@@ -28,13 +28,20 @@
           :disabled="likeProcessing"
           class="flex items-center gap-1 cursor-pointer group disabled:text-zinc-700 disabled:animate-pulse"
           :class="{
-            'text-green-500': likesArray.includes(currentUser),
+            'text-green-500 hover:text-red-500':
+              likesArray.includes(currentUser),
           }"
           @click.prevent="handleLike(clip.id)"
         >
-          <span class="text-sm font-bold">{{ clip.likes }}</span>
+          <span
+            class="text-sm font-bold transition-all duration-150 ease-out"
+            >{{ clip.likes }}</span
+          >
           <ArrowUpCircleIcon
             class="h-5 w-5 mt-1 group-hover:text-purple-700 transition-all duration-150 ease-out"
+            :class="{
+              'group-hover:text-red-500': likesArray.includes(currentUser),
+            }"
           />
         </button>
       </div>
@@ -46,6 +53,7 @@
       :poster="`https://image.mux.com/${clip.playback_id}/thumbnail.webp?width=740&height=410`"
       fluid
       controls
+      aspectRatio="16:9"
       :playbackRates="[0.5, 1, 1.5]"
       :volume="0.25"
     />

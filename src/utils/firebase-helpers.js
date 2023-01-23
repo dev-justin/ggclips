@@ -286,6 +286,13 @@ const getUsersCount = async () => {
   return querySnapshot.size;
 };
 
+// Get total clips count
+const getClipsCount = async () => {
+  const q = query(collection(db, "clips"));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.size;
+};
+
 const errorCodes = (code) => {
   switch (code) {
     case "auth/email-already-in-use":
@@ -324,4 +331,5 @@ export {
   getToken,
   getAllUsersAndClips,
   getUsersCount,
+  getClipsCount,
 };
