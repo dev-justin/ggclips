@@ -8,7 +8,7 @@
         <TrophyIcon class="h-6 w-6 -mt-5 text-amber-500" />
       </div>
       <div
-        class="flex gap-12 min-h-[210px] items-center flex-col justify-center sm:flex-row sm:justify-start pl-12"
+        class="flex gap-12 min-h-[210px] items-center flex-col justify-center sm:flex-row sm:justify-start sm:pl-12"
         v-if="loading"
       >
         <Loaders />
@@ -44,7 +44,7 @@
         <SparklesIcon class="h-6 w-6 -mt-5 text-cyan-300" />
       </div>
       <div
-        class="flex gap-12 min-h-[210px] items-center flex-col justify-center sm:flex-row sm:justify-start pl-12"
+        class="flex gap-12 min-h-[210px] items-center flex-col justify-center sm:flex-row sm:justify-start sm:pl-12"
         v-if="loading"
       >
         <Loaders />
