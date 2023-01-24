@@ -55,6 +55,17 @@ const uploadForm = {
   },
 };
 
+const commentForm = {
+  schema: {
+    Comment: "required|min:3|max:200",
+  },
+  definitions: () => {
+    defineRule("required", required);
+    defineRule("min", min);
+    defineRule("max", max);
+  },
+};
+
 // Export configure function with custom generateMessage to use in the component
 const configureVeeValidate = () => {
   configure({
@@ -79,4 +90,10 @@ const configureVeeValidate = () => {
   });
 };
 
-export { loginForm, registerForm, configureVeeValidate, uploadForm };
+export {
+  loginForm,
+  registerForm,
+  configureVeeValidate,
+  uploadForm,
+  commentForm,
+};

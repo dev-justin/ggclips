@@ -6,17 +6,23 @@
     <div v-else>
       <div class="flex flex-col lg:grid grid-cols-7 gap-8">
         <VideoPlayer
-          class="col-span-4 xl:col-span-5 rounded-lg overflow-clip shadow-2xl shadow-purple-700/20"
+          class="rounded-lg overflow-clip shadow-2xl shadow-purple-700/20 col-span-4 xl:col-span-5"
           :playback="clip.playback_id"
         />
         <div
-          class="col-span-3 xl:col-span-2 flex flex-col gap-4 border-2 p-6 sm:p-8 border-zinc-700 rounded-lg"
+          class="col-span-3 xl:col-span-2 flex flex-col gap-4 border-2 p-6 sm:p-8 border-zinc-700 rounded-lg relative"
         >
+          <!-- Top -->
           <div
             class="flex justify-between sm:block border-b-2 pb-2 sm:pb-6 border-zinc-700/40"
           >
             <div class="flex items-center justify-between pb-4">
               <span class="text-lg text-gray-500">Creator</span>
+              <div
+                class="bg-red-200 inline-flex px-3 py-1 rounded-full text-[0.7rem] font-bold uppercase text-red-900"
+              >
+                <span>{{ clip.game }}</span>
+              </div>
             </div>
             <router-link
               :to="{ name: 'user', params: { id: clip.username } }"
@@ -34,11 +40,12 @@
               </div>
             </router-link>
           </div>
-          <div>
-            <div class="pb-4 flex justify-between items-start">
+          <!-- Middle -->
+          <div class="flex-1">
+            <div class="pb-2 flex justify-between items-start">
               <div>
                 <span class="text-gray-500">{{ convertDate(clip.date) }}</span>
-                <h3 class="text-lg font-bold sm:text-3xl">{{ clip.title }}</h3>
+                <h3 class="text-lg font-bold sm:text-2xl">{{ clip.title }}</h3>
               </div>
               <div
                 v-if="isOwner"
@@ -51,12 +58,17 @@
                 >
               </div>
             </div>
-            <div
-              class="bg-red-200 inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase text-red-900"
-            >
-              <span>{{ clip.game }}</span>
-            </div>
           </div>
+          <!-- Bottom -->
+          <CommentClip class="pt-8" />
+          <!-- <div
+            class="flex items-center gap-1 cursor-pointer group disabled:text-zinc-700 disabled:animate-pulse absolute inset-x-0 bottom-0 p-4"
+          >
+            <span>{{ clip.likes }}</span>
+            <ArrowUpCircleIcon
+              class="h-5 w-5 mt-1 group-hover:text-purple-700 transition-all duration-150 ease-out"
+            />
+          </div> -->
         </div>
       </div>
     </div>
@@ -68,9 +80,10 @@ import { ref } from "vue";
 import { getClip, convertDate } from "@/utils/firebase-helpers";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
-import { PencilSquareIcon } from "@heroicons/vue/20/solid";
+import { PencilSquareIcon, ArrowUpCircleIcon } from "@heroicons/vue/20/solid";
 import VideoPlayer from "@/components/VideoPlayer.vue";
 import Loaders from "@/components/common/Loaders.vue";
+import CommentClip from "../components/CommentClip.vue";
 
 const user = useUserStore();
 const route = useRoute();
@@ -88,6 +101,7 @@ const { id } = route.params;
 getClip(id)
   .then((data) => {
     data ? (clip.value = data) : router.push("/");
+    console.log(data);
   })
   .finally(() => {
     isOwner.value = user.uid === clip.value.uid;
