@@ -155,7 +155,9 @@ import {
 import VideoPlayer from "@/components/VideoPlayer.vue";
 import Loaders from "@/components/common/Loaders.vue";
 import CommentClip from "../components/CommentClip.vue";
+import { useToast } from "vue-toastification";
 
+const toast = useToast();
 const user = useUserStore();
 const route = useRoute();
 const router = useRouter();
