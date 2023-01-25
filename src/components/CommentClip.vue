@@ -48,7 +48,7 @@ commentForm.definitions();
 const handleComment = async (values) => {
   try {
     const authToken = await getToken();
-    if (!authToken) throw new Error({ message: "No auth token" });
+    if (!authToken) throw new Error("No auth token");
 
     const data = await fetch("http://127.0.0.1:3005/api/comment", {
       method: "POST",
@@ -62,7 +62,7 @@ const handleComment = async (values) => {
       }),
     });
 
-    if (!data.ok) throw new Error({ message: "Something went wrong" });
+    if (!data.ok) throw new Error("Something went wrong");
 
     toast.success("Comment added");
   } catch (error) {

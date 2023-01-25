@@ -145,7 +145,7 @@
 
 <script setup>
 import { ref } from "vue";
-import { getClip, convertDate } from "@/utils/firebase-helpers";
+import { getClip, convertDate, getToken } from "@/utils/firebase-helpers";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import {
