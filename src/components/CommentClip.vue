@@ -45,12 +45,12 @@ const props = defineProps({
 configureVeeValidate();
 commentForm.definitions();
 
-const handleComment = async (values) => {
+const handleComment = async (values, { resetForm }) => {
   try {
     const authToken = await getToken();
     if (!authToken) throw new Error("No auth token");
 
-    const data = await fetch("http://127.0.0.1:3005/api/comment", {
+    const data = await fetch("/api/comment", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -63,9 +63,10 @@ const handleComment = async (values) => {
     });
 
     if (!data.ok) throw new Error("Something went wrong");
-
+    resetForm();
     toast.success("Comment added");
   } catch (error) {
+    resetForm();
     switch (error.message) {
       case "No auth token":
         toast.error("You need to be logged in to comment");
