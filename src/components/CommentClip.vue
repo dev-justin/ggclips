@@ -46,8 +46,6 @@ configureVeeValidate();
 commentForm.definitions();
 
 const handleComment = async (values) => {
-  console.log(values);
-
   try {
     const authToken = await getToken();
     if (!authToken) throw new Error({ message: "No auth token" });

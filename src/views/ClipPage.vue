@@ -13,10 +13,8 @@
           class="col-span-3 xl:col-span-2 flex flex-col gap-4 border-2 p-6 sm:p-8 border-zinc-700 rounded-lg relative"
         >
           <!-- Top -->
-          <div
-            class="flex justify-between sm:block border-b-2 pb-2 sm:pb-6 border-zinc-700/40"
-          >
-            <div class="flex items-center justify-between pb-4">
+          <div class="border-b-2 pb-2 sm:pb-6 border-zinc-700/40">
+            <div class="flex items-center justify-between sm:pb-4">
               <span class="text-lg text-gray-500">Creator</span>
               <div
                 class="bg-red-200 inline-flex px-3 py-1 rounded-full text-[0.7rem] font-bold uppercase text-red-900"
@@ -28,9 +26,9 @@
               :to="{ name: 'user', params: { id: clip.username } }"
               class="text-lg sm:text-3xl font-bold hover:text-purple-700 transition-all duration-150 ease-in-out"
             >
-              <div class="inline-flex items-center gap-4">
+              <div class="inline-flex items-center gap-2 sm:gap-4">
                 <img
-                  class="inline-block h-6 w-6 sm:h-8 sm:w-8 rounded-full ring-2 ring-purple-700"
+                  class="inline-block h-4 w-4 sm:h-8 sm:w-8 rounded-full ring-2 ring-purple-700"
                   :src="clip.avatar"
                   :alt="clip.username"
                 />
@@ -47,25 +45,43 @@
                 <span class="text-gray-500">{{ convertDate(clip.date) }}</span>
                 <h3 class="text-lg font-bold sm:text-2xl">{{ clip.title }}</h3>
               </div>
-              <div
-                v-if="isOwner"
-                class="flex flex-row-reverse items-center gap-1 cursor-pointer group"
+              <button
+                :disabled="likeProcessing"
+                class="flex items-center gap-1 cursor-pointer group disabled:text-zinc-700 disabled:animate-pulse"
+                :class="{
+                  'text-green-500 hover:text-red-500': clip.likes.includes(
+                    user.username
+                  ),
+                }"
+                @click.prevent="handleLike(clip.id)"
               >
-                <PencilSquareIcon class="h-6 w-6 text-purple-700" />
                 <span
-                  class="text-zinc-700 font-semibold group-hover:text-purple-700"
-                  >Edit</span
+                  class="text-sm font-bold transition-all duration-150 ease-out"
+                  >{{ clip.likes.length }}</span
                 >
-              </div>
+                <ArrowUpCircleIcon
+                  class="h-5 w-5 mt-1 group-hover:text-purple-700 transition-all duration-150 ease-out"
+                  :class="{
+                    'group-hover:text-red-500': clip.likes.includes(
+                      user.username
+                    ),
+                  }"
+                />
+              </button>
             </div>
           </div>
           <div v-if="clip.comments.length">
             <div class="flex justify-between items-center pb-4">
               <h3 class="font-bold text-purple-900 text-xl">Recent Comments</h3>
-              <ChatBubbleOvalLeftIcon
-                class="h-6 w-6 text-purple-700 hover:text-purple-900 transition-all duration-150 ease-out cursor-pointer"
+              <div
+                class="flex items-center gap-1 cursor-pointer group"
                 @click.prevent="showComments = !showComments"
-              />
+              >
+                <span class="text-sm text-zinc-500">View All</span>
+                <ChatBubbleOvalLeftIcon
+                  class="h-6 w-6 text-purple-700 group-hover:text-purple-900 transition-all duration-150 ease-out"
+                />
+              </div>
             </div>
             <div
               class="flex flex-col gap-4 divide-y-[1px] divide-zinc-800 overflow-y-auto max-h-[200px]"
@@ -94,31 +110,10 @@
           </div>
           <!-- Bottom -->
           <CommentClip class="pt-8" :clipId="clip.id" />
-          <button
-            :disabled="likeProcessing"
-            class="flex items-center gap-1 cursor-pointer group disabled:text-zinc-700 disabled:animate-pulse"
-            :class="{
-              'text-green-500 hover:text-red-500': clip.likes.includes(
-                user.username
-              ),
-            }"
-            @click.prevent="handleLike(clip.id)"
-          >
-            <span
-              class="text-sm font-bold transition-all duration-150 ease-out"
-              >{{ clip.likes.length }}</span
-            >
-            <ArrowUpCircleIcon
-              class="h-5 w-5 mt-1 group-hover:text-purple-700 transition-all duration-150 ease-out"
-              :class="{
-                'group-hover:text-red-500': clip.likes.includes(user.username),
-              }"
-            />
-          </button>
         </div>
       </div>
     </div>
-    <div v-if="clip.comments.length && showComments" class="pt-12">
+    <div v-if="clip?.comments.length && showComments" class="pt-12">
       <h3 class="font-bold text-purple-900 text-xl">Comments</h3>
       <div
         class="flex flex-col gap-4 divide-y-[1px] divide-zinc-800 overflow-y-auto max-h-[200px]"
@@ -154,7 +149,6 @@ import { getClip, convertDate } from "@/utils/firebase-helpers";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import {
-  PencilSquareIcon,
   ArrowUpCircleIcon,
   ChatBubbleOvalLeftIcon,
 } from "@heroicons/vue/20/solid";
@@ -179,7 +173,6 @@ const { id } = route.params;
 getClip(id)
   .then((data) => {
     data ? (clip.value = data) : router.push("/");
-    console.log(data);
   })
   .finally(() => {
     isOwner.value = user.uid === clip.value.uid;
