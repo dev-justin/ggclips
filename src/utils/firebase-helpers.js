@@ -206,7 +206,10 @@ const getLikes = async (id) => {
 
 // Get the comments collection for a specific clip
 const getComments = async (id) => {
-  const q = query(collection(db, "clips", id, "comments"));
+  const q = query(
+    collection(db, "clips", id, "comments"),
+    orderBy("date", "desc")
+  );
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map((doc) => doc.data());
 };
