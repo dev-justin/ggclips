@@ -144,7 +144,9 @@ const convertDate = (date) => {
 const getClip = async (id) => {
   const docRef = doc(db, "clips", id);
   const docSnap = await getDoc(docRef);
-  return docSnap.data();
+  const likes = await getLikes(id);
+  const comments = await getComments(id);
+  return { id: docSnap.id, ...docSnap.data(), likes, comments };
 };
 
 // Get clips by user id
@@ -200,6 +202,13 @@ const getLikes = async (id) => {
   const q = query(collection(db, "clips", id, "likes"));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map((doc) => doc.id);
+};
+
+// Get the comments collection for a specific clip
+const getComments = async (id) => {
+  const q = query(collection(db, "clips", id, "comments"));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map((doc) => doc.data());
 };
 
 // Get the X most recent clips and their likes subcollection

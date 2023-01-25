@@ -9,6 +9,7 @@ const axios = require("axios");
 const qs = require("qs");
 const Redis = require("ioredis");
 const rateLimit = require("express-rate-limit");
+const Filter = require("bad-words");
 
 // Init Express & dotenv
 const app = express();
@@ -44,6 +45,9 @@ const redis = new Redis({
   port: process.env.REDIS_PORT,
   password: process.env.REDIS_PASSWORD,
 });
+
+// Init Filter (for profanity)
+const filter = new Filter();
 
 // Init Firebase
 const serviceAccount = {
@@ -347,6 +351,46 @@ app.post("/api/deleteClip", async (req, res) => {
   }
 });
 
+// Add comment to clip
+app.post("/api/comment", async (req, res) => {
+  const { clipId, comment } = req.body;
+
+  if (!clipId) return res.status(400).json({ error: "Missing clip ID." });
+  if (!comment) return res.status(400).json({ error: "Missing comment." });
+
+  // Find the user doc.id and doc.data().photoURL from /usernames/{username}/uid = req.user.uid
+  const usernameRef = await db.collection("usernames");
+  const userQuery = await usernameRef.where("uid", "==", req.user.uid).get();
+  const userDetails = userQuery.docs.map((doc) => ({
+    userId: doc.id,
+    avatar: doc.data().photoURL,
+  }));
+
+  const { userId, avatar } = userDetails[0];
+
+  if (!userId) return res.status(400).json({ error: "Not authorized." });
+
+  try {
+    // Add comment to clips comment collection
+    await db
+      .collection("clips")
+      .doc(clipId)
+      .collection("comments")
+      .add({
+        comment: filter.clean(comment),
+        date: new Date(),
+        uid: req.user.uid,
+        username: userId,
+        avatar,
+      })
+      .then((docRef) => {
+        res.json({ success: true, commentId: docRef.id });
+      });
+  } catch {
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
 // Close Redis connection on exit
 process.on("SIGINT", () => {
   console.log("Closing Redis client connection...");
@@ -354,10 +398,10 @@ process.on("SIGINT", () => {
   process.exit();
 });
 
-// app.listen(
-//   process.env.PORT || 3001,
-//   console.log(`Server running on port ${process.env.PORT || 3001} 🚀`)
-// );
+app.listen(
+  process.env.PORT || 3001,
+  console.log(`Server running on port ${process.env.PORT || 3001} 🚀`)
+);
 
 // Deploy for vercel
-module.exports = app;
+// module.exports = app;

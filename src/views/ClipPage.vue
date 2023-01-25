@@ -4,7 +4,7 @@
       <Loaders />
     </div>
     <div v-else>
-      <div class="flex flex-col lg:grid grid-cols-7 gap-8">
+      <div class="flex flex-col 2xl:grid grid-cols-7 gap-8">
         <VideoPlayer
           class="rounded-lg overflow-clip shadow-2xl shadow-purple-700/20 col-span-4 xl:col-span-5"
           :playback="clip.playback_id"
@@ -59,16 +59,89 @@
               </div>
             </div>
           </div>
+          <div v-if="clip.comments.length">
+            <div class="flex justify-between items-center pb-4">
+              <h3 class="font-bold text-purple-900 text-xl">Recent Comments</h3>
+              <ChatBubbleOvalLeftIcon
+                class="h-6 w-6 text-purple-700 hover:text-purple-900 transition-all duration-150 ease-out cursor-pointer"
+                @click.prevent="showComments = !showComments"
+              />
+            </div>
+            <div
+              class="flex flex-col gap-4 divide-y-[1px] divide-zinc-800 overflow-y-auto max-h-[200px]"
+            >
+              <div v-for="comment in clip.comments.slice(0, 2)">
+                <span class="text-xs text-zinc-600 inline-flex pb-2">{{
+                  convertDate(comment.date)
+                }}</span>
+
+                <div class="flex items-center gap-2 text-zinc-500">
+                  <img
+                    class="inline-block h-4 w-4 sm:h-5 sm:w-5 rounded-full"
+                    :src="comment.avatar"
+                    :alt="comment.username"
+                  />
+
+                  <p>
+                    <span class="font-semibold pr-2 text-purple-900"
+                      >{{ comment.username }}:</span
+                    >
+                    <span> {{ comment.comment }}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
           <!-- Bottom -->
-          <CommentClip class="pt-8" />
-          <!-- <div
-            class="flex items-center gap-1 cursor-pointer group disabled:text-zinc-700 disabled:animate-pulse absolute inset-x-0 bottom-0 p-4"
+          <CommentClip class="pt-8" :clipId="clip.id" />
+          <button
+            :disabled="likeProcessing"
+            class="flex items-center gap-1 cursor-pointer group disabled:text-zinc-700 disabled:animate-pulse"
+            :class="{
+              'text-green-500 hover:text-red-500': clip.likes.includes(
+                user.username
+              ),
+            }"
+            @click.prevent="handleLike(clip.id)"
           >
-            <span>{{ clip.likes }}</span>
+            <span
+              class="text-sm font-bold transition-all duration-150 ease-out"
+              >{{ clip.likes.length }}</span
+            >
             <ArrowUpCircleIcon
               class="h-5 w-5 mt-1 group-hover:text-purple-700 transition-all duration-150 ease-out"
+              :class="{
+                'group-hover:text-red-500': clip.likes.includes(user.username),
+              }"
             />
-          </div> -->
+          </button>
+        </div>
+      </div>
+    </div>
+    <div v-if="clip.comments.length && showComments" class="pt-12">
+      <h3 class="font-bold text-purple-900 text-xl">Comments</h3>
+      <div
+        class="flex flex-col gap-4 divide-y-[1px] divide-zinc-800 overflow-y-auto max-h-[200px]"
+      >
+        <div v-for="comment in clip.comments">
+          <span class="text-xs text-zinc-600 inline-flex pb-2">{{
+            convertDate(comment.date)
+          }}</span>
+
+          <div class="flex items-center gap-2 text-zinc-500">
+            <img
+              class="inline-block h-4 w-4 sm:h-5 sm:w-5 rounded-full"
+              :src="comment.avatar"
+              :alt="comment.username"
+            />
+
+            <p>
+              <span class="font-semibold pr-2 text-purple-900"
+                >{{ comment.username }}:</span
+              >
+              <span> {{ comment.comment }}</span>
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -80,7 +153,11 @@ import { ref } from "vue";
 import { getClip, convertDate } from "@/utils/firebase-helpers";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
-import { PencilSquareIcon, ArrowUpCircleIcon } from "@heroicons/vue/20/solid";
+import {
+  PencilSquareIcon,
+  ArrowUpCircleIcon,
+  ChatBubbleOvalLeftIcon,
+} from "@heroicons/vue/20/solid";
 import VideoPlayer from "@/components/VideoPlayer.vue";
 import Loaders from "@/components/common/Loaders.vue";
 import CommentClip from "../components/CommentClip.vue";
@@ -92,7 +169,8 @@ const router = useRouter();
 // States
 const clip = ref(null);
 const isOwner = ref(false);
-const editMode = ref(false);
+const showComments = ref(false);
+const likeProcessing = ref(false);
 
 // Get route params
 const { id } = route.params;
@@ -106,4 +184,45 @@ getClip(id)
   .finally(() => {
     isOwner.value = user.uid === clip.value.uid;
   });
+
+// Post to /api/like with the clip id
+const handleLike = async (id) => {
+  likeProcessing.value = true;
+  try {
+    const authToken = await getToken();
+    if (!authToken) throw new Error("No auth token");
+    const likeAction = fetch("/api/like", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ clipId: id }),
+    });
+    const res = await likeAction;
+    if (res.status === 429)
+      throw new Error("Oops, too many requests! You have been rate limited.");
+    const data = await res.json();
+    // Update clips.likes from data.likes
+    props.clip.likes = data.likes;
+    data.liked
+      ? props.likesArray.push(props.currentUser)
+      : props.likesArray.splice(props.likesArray.indexOf(props.currentUser), 1);
+  } catch (err) {
+    switch (err.message) {
+      case "No auth token":
+        toast.error("You must be logged in to like a clip");
+        break;
+      case "Oops, too many requests! You have been rate limited.":
+        toast.error(err.message);
+        break;
+      default:
+        toast.error("Something went wrong");
+    }
+  }
+  // Add an extra second to prevent double clicking
+  setTimeout(() => {
+    likeProcessing.value = false;
+  }, 1000);
+};
 </script>
