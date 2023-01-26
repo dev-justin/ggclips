@@ -88,7 +88,9 @@
             >
               <div v-for="comment in clip.comments.slice(0, 2)">
                 <span class="text-xs text-zinc-600 inline-flex pb-2">{{
-                  convertDate(comment.date)
+                  convertDate(comment.date) != "Invalid Date"
+                    ? convertDate(comment.date)
+                    : "Just Now"
                 }}</span>
 
                 <div class="flex items-center gap-2 text-zinc-500">
@@ -109,7 +111,11 @@
             </div>
           </div>
           <!-- Bottom -->
-          <CommentClip class="pt-8" :clipId="clip.id" />
+          <CommentClip
+            class="pt-8"
+            :clipId="clip.id"
+            @commentAdded="pushComment"
+          />
         </div>
       </div>
     </div>
@@ -219,5 +225,10 @@ const handleLike = async (id) => {
   setTimeout(() => {
     likeProcessing.value = false;
   }, 1000);
+};
+
+// Push comment to clip.comments
+const pushComment = (comment) => {
+  clip.value.comments.unshift(comment);
 };
 </script>

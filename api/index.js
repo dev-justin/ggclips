@@ -384,7 +384,16 @@ app.post("/api/comment", async (req, res) => {
         avatar,
       })
       .then((docRef) => {
-        res.json({ success: true, commentId: docRef.id });
+        res.json({
+          success: true,
+          commentData: {
+            comment: filter.clean(comment),
+            date: new Date(),
+            uid: req.user.uid,
+            username: userId,
+            avatar,
+          },
+        });
       });
   } catch {
     res.status(500).json({ error: "Something went wrong" });

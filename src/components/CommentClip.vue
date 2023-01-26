@@ -35,6 +35,9 @@ import { getToken } from "@/utils/firebase-helpers";
 
 const toast = useToast();
 
+// Emit event to parent
+const emit = defineEmits(["commentAdded"]);
+
 const props = defineProps({
   clipId: {
     type: String,
@@ -50,7 +53,7 @@ const handleComment = async (values, { resetForm }) => {
     const authToken = await getToken();
     if (!authToken) throw new Error("No auth token");
 
-    const data = await fetch("/api/comment", {
+    const data = await fetch("http://127.0.0.1:3005/api/comment", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -64,6 +67,9 @@ const handleComment = async (values, { resetForm }) => {
 
     if (!data.ok) throw new Error("Something went wrong");
     resetForm();
+    const commentRes = await data.json();
+    if (!commentRes.success) throw new Error("Something went wrong");
+    emit("commentAdded", commentRes.commentData);
     toast.success("Comment added");
   } catch (error) {
     resetForm();
