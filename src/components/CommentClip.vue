@@ -53,7 +53,7 @@ const handleComment = async (values, { resetForm }) => {
     const authToken = await getToken();
     if (!authToken) throw new Error("No auth token");
 
-    const data = await fetch("http://127.0.0.1:3005/api/comment", {
+    const data = await fetch("/api/comment", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${authToken}`,
