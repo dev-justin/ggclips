@@ -7,4 +7,4 @@
 ![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Vercel](https://img.shields.io/badge/vercel-%23000000.svg?style=for-the-badge&logo=vercel&logoColor=white)
 
-Gaming clips sharing platform built using Vue, Firebase, TailwindCSS and more.
+Gaming clips sharing platform built using Vue, Express, Redis, Firebase, TailwindCSS and more.
