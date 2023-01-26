@@ -407,10 +407,10 @@ process.on("SIGINT", () => {
   process.exit();
 });
 
-app.listen(
-  process.env.PORT || 3001,
-  console.log(`Server running on port ${process.env.PORT || 3001} 🚀`)
-);
+// app.listen(
+//   process.env.PORT || 3001,
+//   console.log(`Server running on port ${process.env.PORT || 3001} 🚀`)
+// );
 
 // Deploy for vercel
-// module.exports = app;
+module.exports = app;
