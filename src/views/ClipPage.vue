@@ -205,10 +205,9 @@ const handleLike = async (id) => {
       throw new Error("Oops, too many requests! You have been rate limited.");
     const data = await res.json();
     // Update clips.likes from data.likes
-    props.clip.likes = data.likes;
     data.liked
-      ? props.likesArray.push(props.currentUser)
-      : props.likesArray.splice(props.likesArray.indexOf(props.currentUser), 1);
+      ? clip.likes.push(props.currentUser)
+      : clip.likes.splice(clip.likes.indexOf(props.currentUser), 1);
   } catch (err) {
     switch (err.message) {
       case "No auth token":
