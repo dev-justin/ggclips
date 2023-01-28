@@ -206,9 +206,10 @@ const handleLike = async (id) => {
     const data = await res.json();
     // Update clips.likes from data.likes
     data.liked
-      ? clip.likes.push(props.currentUser)
-      : clip.likes.splice(clip.likes.indexOf(props.currentUser), 1);
+      ? clip.value.likes.push(user.username)
+      : clip.value.likes.splice(clip.value.likes.indexOf(user.username), 1);
   } catch (err) {
+    console.log(err);
     switch (err.message) {
       case "No auth token":
         toast.error("You must be logged in to like a clip");
