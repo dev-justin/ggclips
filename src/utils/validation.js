@@ -39,7 +39,7 @@ const registerForm = {
 
 const uploadForm = {
   schema: {
-    Title: "required|min:3|max:20",
+    Title: "required|min:3|max:40",
     Game: "required|min:3|isGame",
     File: "required|mimes:mp4,mov|size:100000",
   },
